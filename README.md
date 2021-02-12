@@ -1,21 +1,13 @@
 # proxy-addr
 
-[![NPM Version][npm-version-image]][npm-url]
-[![NPM Downloads][npm-downloads-image]][npm-url]
-[![Node.js Version][node-image]][node-url]
-[![Build Status][travis-image]][travis-url]
-[![Test Coverage][coveralls-image]][coveralls-url]
+Determine address of proxied request.
 
-Determine address of proxied request
+Forked from https://github.com/jshttp/proxy-addr to address https://github.com/jshttp/forwarded/pull/9.
 
 ## Install
 
-This is a [Node.js](https://nodejs.org/en/) module available through the
-[npm registry](https://www.npmjs.com/). Installation is done using the
-[`npm install` command](https://docs.npmjs.com/getting-started/installing-npm-packages-locally):
-
 ```sh
-$ npm install proxy-addr
+$ npm install @fastify/proxy-addr
 ```
 
 ## API
@@ -23,7 +15,7 @@ $ npm install proxy-addr
 <!-- eslint-disable no-unused-vars -->
 
 ```js
-var proxyaddr = require('proxy-addr')
+var proxyaddr = require('@fastify/proxy-addr')
 ```
 
 ### proxyaddr(req, trust)
@@ -143,13 +135,3 @@ $ npm run-script bench
 ## License
 
 [MIT](LICENSE)
-
-[coveralls-image]: https://badgen.net/coveralls/c/github/jshttp/proxy-addr/master
-[coveralls-url]: https://coveralls.io/r/jshttp/proxy-addr?branch=master
-[node-image]: https://badgen.net/npm/node/proxy-addr
-[node-url]: https://nodejs.org/en/download
-[npm-downloads-image]: https://badgen.net/npm/dm/proxy-addr
-[npm-url]: https://npmjs.org/package/proxy-addr
-[npm-version-image]: https://badgen.net/npm/v/proxy-addr
-[travis-image]: https://badgen.net/travis/jshttp/proxy-addr/master
-[travis-url]: https://travis-ci.org/jshttp/proxy-addr

@@ -8,10 +8,10 @@ global.createReq = createReq
 /**
  * Module dependencies.
  */
-var benchmark = require('benchmark')
-var benchmarks = require('beautify-benchmark')
+const benchmark = require('benchmark')
+const benchmarks = require('beautify-benchmark')
 
-var suite = new benchmark.Suite()
+const suite = new benchmark.Suite()
 
 suite.add({
   name: 'ipv4',
@@ -46,7 +46,7 @@ suite.run({ async: false })
 
 function createReq (socketAddr, forwardedFor) {
   return {
-    connection: {
+    socket: {
       remoteAddress: socketAddr
     },
     headers: {

@@ -1,5 +1,5 @@
 {
-  "name": "proxy-addr",
+  "name": "@fastify/proxy-addr",
   "description": "Determine address of proxied request",
   "version": "2.0.6",
   "author": "Douglas Christopher Wilson <doug@somethingdoug.com>",
@@ -9,39 +9,24 @@
     "proxy",
     "x-forwarded-for"
   ],
-  "repository": "jshttp/proxy-addr",
+  "repository": "fastify/proxy-addr",
   "dependencies": {
-    "forwarded": "~0.1.2",
-    "ipaddr.js": "1.9.1"
+    "@fastify/forwarded": "^1.0.0",
+    "ipaddr.js": "^2.0.0"
   },
   "devDependencies": {
-    "benchmark": "2.1.4",
     "beautify-benchmark": "0.2.4",
-    "deep-equal": "1.0.1",
-    "eslint": "6.8.0",
-    "eslint-config-standard": "14.1.1",
-    "eslint-plugin-import": "2.21.2",
-    "eslint-plugin-markdown": "1.0.2",
-    "eslint-plugin-node": "11.1.0",
-    "eslint-plugin-promise": "4.2.1",
-    "eslint-plugin-standard": "4.0.1",
-    "mocha": "8.0.1",
-    "nyc": "15.1.0"
+    "benchmark": "2.1.4",
+    "standard": "^16.0.3",
+    "tap": "^14.11.0"
   },
   "files": [
     "LICENSE",
-    "HISTORY.md",
     "README.md",
     "index.js"
   ],
-  "engines": {
-    "node": ">= 0.10"
-  },
   "scripts": {
     "bench": "node benchmark/index.js",
-    "lint": "eslint --plugin markdown --ext js,md .",
-    "test": "mocha --reporter spec --bail --check-leaks test/",
-    "test-cov": "nyc --reporter=text npm test",
-    "test-travis": "nyc --reporter=html --reporter=text npm test"
+    "test": "standard && tap"
   }
 }

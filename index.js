@@ -1,5 +1,6 @@
 /*!
  * proxy-addr
+ * Copyright(c) 2021 Fastify collaborators
  * Copyright(c) 2014-2016 Douglas Christopher Wilson
  * MIT Licensed
  */
@@ -20,24 +21,24 @@ module.exports.compile = compile
  * @private
  */
 
-var forwarded = require('forwarded')
-var ipaddr = require('ipaddr.js')
+const forwarded = require('@fastify/forwarded')
+const ipaddr = require('ipaddr.js')
 
 /**
  * Variables.
  * @private
  */
 
-var DIGIT_REGEXP = /^[0-9]+$/
-var isip = ipaddr.isValid
-var parseip = ipaddr.parse
+const DIGIT_REGEXP = /^[0-9]+$/
+const isip = ipaddr.isValid
+const parseip = ipaddr.parse
 
 /**
  * Pre-defined IP ranges.
  * @private
  */
 
-var IP_RANGES = {
+const IP_RANGES = {
   linklocal: ['169.254.0.0/16', 'fe80::/10'],
   loopback: ['127.0.0.1/8', '::1/128'],
   uniquelocal: ['10.0.0.0/8', '172.16.0.0/12', '192.168.0.0/16', 'fc00::/7']
@@ -54,7 +55,7 @@ var IP_RANGES = {
 
 function alladdrs (req, trust) {
   // get addresses
-  var addrs = forwarded(req)
+  const addrs = forwarded(req)
 
   if (!trust) {
     // Return all addresses
@@ -65,6 +66,7 @@ function alladdrs (req, trust) {
     trust = compile(trust)
   }
 
+  /* eslint-disable no-var */
   for (var i = 0; i < addrs.length - 1; i++) {
     if (trust(addrs[i], i)) continue
 
@@ -86,7 +88,7 @@ function compile (val) {
     throw new TypeError('argument is required')
   }
 
-  var trust
+  let trust
 
   if (typeof val === 'string') {
     trust = [val]
@@ -96,6 +98,7 @@ function compile (val) {
     throw new TypeError('unsupported trust argument')
   }
 
+  /* eslint-disable no-var */
   for (var i = 0; i < trust.length; i++) {
     val = trust[i]
 
@@ -120,8 +123,9 @@ function compile (val) {
  */
 
 function compileRangeSubnets (arr) {
-  var rangeSubnets = new Array(arr.length)
+  const rangeSubnets = new Array(arr.length)
 
+  /* eslint-disable no-var */
   for (var i = 0; i < arr.length; i++) {
     rangeSubnets[i] = parseipNotation(arr[i])
   }
@@ -138,7 +142,7 @@ function compileRangeSubnets (arr) {
 
 function compileTrust (rangeSubnets) {
   // Return optimized function based on length
-  var len = rangeSubnets.length
+  const len = rangeSubnets.length
   return len === 0
     ? trustNone
     : len === 1
@@ -154,8 +158,8 @@ function compileTrust (rangeSubnets) {
  */
 
 function parseipNotation (note) {
-  var pos = note.lastIndexOf('/')
-  var str = pos !== -1
+  const pos = note.lastIndexOf('/')
+  const str = pos !== -1
     ? note.substring(0, pos)
     : note
 
@@ -163,18 +167,18 @@ function parseipNotation (note) {
     throw new TypeError('invalid IP address: ' + str)
   }
 
-  var ip = parseip(str)
+  let ip = parseip(str)
 
   if (pos === -1 && ip.kind() === 'ipv6' && ip.isIPv4MappedAddress()) {
     // Store as IPv4
     ip = ip.toIPv4Address()
   }
 
-  var max = ip.kind() === 'ipv6'
+  const max = ip.kind() === 'ipv6'
     ? 128
     : 32
 
-  var range = pos !== -1
+  let range = pos !== -1
     ? note.substring(pos + 1, note.length)
     : null
 
@@ -203,8 +207,8 @@ function parseipNotation (note) {
  */
 
 function parseNetmask (netmask) {
-  var ip = parseip(netmask)
-  var kind = ip.kind()
+  const ip = parseip(netmask)
+  const kind = ip.kind()
 
   return kind === 'ipv4'
     ? ip.prefixLengthFromSubnetMask()
@@ -228,8 +232,8 @@ function proxyaddr (req, trust) {
     throw new TypeError('trust argument is required')
   }
 
-  var addrs = alladdrs(req, trust)
-  var addr = addrs[addrs.length - 1]
+  const addrs = alladdrs(req, trust)
+  const addr = addrs[addrs.length - 1]
 
   return addr
 }
@@ -255,16 +259,17 @@ function trustMulti (subnets) {
   return function trust (addr) {
     if (!isip(addr)) return false
 
-    var ip = parseip(addr)
-    var ipconv
-    var kind = ip.kind()
+    const ip = parseip(addr)
+    let ipconv
+    const kind = ip.kind()
 
+    /* eslint-disable no-var */
     for (var i = 0; i < subnets.length; i++) {
-      var subnet = subnets[i]
-      var subnetip = subnet[0]
-      var subnetkind = subnetip.kind()
-      var subnetrange = subnet[1]
-      var trusted = ip
+      const subnet = subnets[i]
+      const subnetip = subnet[0]
+      const subnetkind = subnetip.kind()
+      const subnetrange = subnet[1]
+      let trusted = ip
 
       if (kind !== subnetkind) {
         if (subnetkind === 'ipv4' && !ip.isIPv4MappedAddress()) {
@@ -299,16 +304,16 @@ function trustMulti (subnets) {
  */
 
 function trustSingle (subnet) {
-  var subnetip = subnet[0]
-  var subnetkind = subnetip.kind()
-  var subnetisipv4 = subnetkind === 'ipv4'
-  var subnetrange = subnet[1]
+  const subnetip = subnet[0]
+  const subnetkind = subnetip.kind()
+  const subnetisipv4 = subnetkind === 'ipv4'
+  const subnetrange = subnet[1]
 
   return function trust (addr) {
     if (!isip(addr)) return false
 
-    var ip = parseip(addr)
-    var kind = ip.kind()
+    let ip = parseip(addr)
+    const kind = ip.kind()
 
     if (kind !== subnetkind) {
       if (subnetisipv4 && !ip.isIPv4MappedAddress()) {
