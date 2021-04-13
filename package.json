@@ -9,7 +9,14 @@
     "proxy",
     "x-forwarded-for"
   ],
-  "repository": "fastify/proxy-addr",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fastify/proxy-addr.git"
+  },
+  "bugs": {
+    "url": "https://github.com/fastify/proxy-addr/issues"
+  },
+  "homepage": "https://github.com/fastify/proxy-addr#readme",
   "dependencies": {
     "@fastify/forwarded": "^1.0.0",
     "ipaddr.js": "^2.0.0"
