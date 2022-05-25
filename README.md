@@ -2,7 +2,6 @@
 
 ![CI](https://github.com/fastify/proxy-addr/workflows/CI/badge.svg)
 [![NPM version](https://img.shields.io/npm/v/@fastify/proxy-addr.svg?style=flat)](https://www.npmjs.com/package/@fastify/proxy-addr)
-[![Known Vulnerabilities](https://snyk.io/test/github/fastify/proxy-addr/badge.svg)](https://snyk.io/test/github/fastify/proxy-addr)
 [![js-standard-style](https://img.shields.io/badge/code%20style-standard-brightgreen.svg?style=flat)](https://standardjs.com/)
 
 Determine address of proxied request.
