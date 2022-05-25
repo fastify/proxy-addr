@@ -72,7 +72,7 @@ test('trust should not alter input array', function (t) {
   const arr = ['loopback', '10.0.0.1']
   const req = createReq('127.0.0.1')
   t.doesNotThrow(proxyaddr.bind(null, req, arr))
-  t.deepEqual(arr, ['loopback', '10.0.0.1'])
+  t.same(arr, ['loopback', '10.0.0.1'])
   t.end()
 })
 
@@ -115,7 +115,7 @@ test('trust should be invoked as trust(addr, i)', function (t) {
     return log.push(Array.prototype.slice.call(arguments))
   })
 
-  t.deepEqual(log, [
+  t.same(log, [
     ['127.0.0.1', 0],
     ['10.0.0.1', 1]
   ])
@@ -125,7 +125,7 @@ test('trust should be invoked as trust(addr, i)', function (t) {
 
 test('with all trusted should return socket address wtesth no headers', function (t) {
   const req = createReq('127.0.0.1')
-  t.strictEqual(proxyaddr(req, all), '127.0.0.1')
+  t.equal(proxyaddr(req, all), '127.0.0.1')
   t.end()
 })
 
@@ -133,7 +133,7 @@ test('with all trusted should return header value', function (t) {
   const req = createReq('127.0.0.1', {
     'x-forwarded-for': '10.0.0.1'
   })
-  t.strictEqual(proxyaddr(req, all), '10.0.0.1')
+  t.equal(proxyaddr(req, all), '10.0.0.1')
   t.end()
 })
 
@@ -141,13 +141,13 @@ test('with all trusted should return furthest header value', function (t) {
   const req = createReq('127.0.0.1', {
     'x-forwarded-for': '10.0.0.1, 10.0.0.2'
   })
-  t.strictEqual(proxyaddr(req, all), '10.0.0.1')
+  t.equal(proxyaddr(req, all), '10.0.0.1')
   t.end()
 })
 
 test('with none trusted should return socket address wtesth no headers', function (t) {
   const req = createReq('127.0.0.1')
-  t.strictEqual(proxyaddr(req, none), '127.0.0.1')
+  t.equal(proxyaddr(req, none), '127.0.0.1')
   t.end()
 })
 
@@ -155,13 +155,13 @@ test('with none trusted should return socket address wtesth headers', function (
   const req = createReq('127.0.0.1', {
     'x-forwarded-for': '10.0.0.1, 10.0.0.2'
   })
-  t.strictEqual(proxyaddr(req, none), '127.0.0.1')
+  t.equal(proxyaddr(req, none), '127.0.0.1')
   t.end()
 })
 
 test('with some trusted should return socket address wtesth no headers', function (t) {
   const req = createReq('127.0.0.1')
-  t.strictEqual(proxyaddr(req, trust10x), '127.0.0.1')
+  t.equal(proxyaddr(req, trust10x), '127.0.0.1')
   t.end()
 })
 
@@ -169,7 +169,7 @@ test('with some trusted should return socket address when not trusted', function
   const req = createReq('127.0.0.1', {
     'x-forwarded-for': '10.0.0.1, 10.0.0.2'
   })
-  t.strictEqual(proxyaddr(req, trust10x), '127.0.0.1')
+  t.equal(proxyaddr(req, trust10x), '127.0.0.1')
   t.end()
 })
 
@@ -177,7 +177,7 @@ test('with some trusted should return header when socket trusted', function (t) 
   const req = createReq('10.0.0.1', {
     'x-forwarded-for': '192.168.0.1'
   })
-  t.strictEqual(proxyaddr(req, trust10x), '192.168.0.1')
+  t.equal(proxyaddr(req, trust10x), '192.168.0.1')
   t.end()
 })
 
@@ -185,7 +185,7 @@ test('with some trusted should return first untrusted after trusted', function (
   const req = createReq('10.0.0.1', {
     'x-forwarded-for': '192.168.0.1, 10.0.0.2'
   })
-  t.strictEqual(proxyaddr(req, trust10x), '192.168.0.1')
+  t.equal(proxyaddr(req, trust10x), '192.168.0.1')
   t.end()
 })
 
@@ -193,7 +193,7 @@ test('with some trusted should not skip untrusted', function (t) {
   const req = createReq('10.0.0.1', {
     'x-forwarded-for': '10.0.0.3, 192.168.0.1, 10.0.0.2'
   })
-  t.strictEqual(proxyaddr(req, trust10x), '192.168.0.1')
+  t.equal(proxyaddr(req, trust10x), '192.168.0.1')
   t.end()
 })
 
@@ -201,7 +201,7 @@ test('when given array should accept ltesteral IP addresses', function (t) {
   const req = createReq('10.0.0.1', {
     'x-forwarded-for': '192.168.0.1, 10.0.0.2'
   })
-  t.strictEqual(proxyaddr(req, ['10.0.0.1', '10.0.0.2']), '192.168.0.1')
+  t.equal(proxyaddr(req, ['10.0.0.1', '10.0.0.2']), '192.168.0.1')
   t.end()
 })
 
@@ -209,7 +209,7 @@ test('when given array should not trust non-IP addresses', function (t) {
   const req = createReq('10.0.0.1', {
     'x-forwarded-for': '192.168.0.1, 10.0.0.2, localhost'
   })
-  t.strictEqual(proxyaddr(req, ['10.0.0.1', '10.0.0.2']), 'localhost')
+  t.equal(proxyaddr(req, ['10.0.0.1', '10.0.0.2']), 'localhost')
   t.end()
 })
 
@@ -217,13 +217,13 @@ test('when given array should return socket address if none match', function (t)
   const req = createReq('10.0.0.1', {
     'x-forwarded-for': '192.168.0.1, 10.0.0.2'
   })
-  t.strictEqual(proxyaddr(req, ['127.0.0.1', '192.168.0.100']), '10.0.0.1')
+  t.equal(proxyaddr(req, ['127.0.0.1', '192.168.0.100']), '10.0.0.1')
   t.end()
 })
 
 test('when array empty should return socket address ', function (t) {
   const req = createReq('127.0.0.1')
-  t.strictEqual(proxyaddr(req, []), '127.0.0.1')
+  t.equal(proxyaddr(req, []), '127.0.0.1')
   t.end()
 })
 
@@ -231,7 +231,7 @@ test('when array empty should return socket address wtesth headers', function (t
   const req = createReq('127.0.0.1', {
     'x-forwarded-for': '10.0.0.1, 10.0.0.2'
   })
-  t.strictEqual(proxyaddr(req, []), '127.0.0.1')
+  t.equal(proxyaddr(req, []), '127.0.0.1')
   t.end()
 })
 
@@ -239,7 +239,7 @@ test('when given IPv4 addresses should accept ltesteral IP addresses', function 
   const req = createReq('10.0.0.1', {
     'x-forwarded-for': '192.168.0.1, 10.0.0.2'
   })
-  t.strictEqual(proxyaddr(req, ['10.0.0.1', '10.0.0.2']), '192.168.0.1')
+  t.equal(proxyaddr(req, ['10.0.0.1', '10.0.0.2']), '192.168.0.1')
   t.end()
 })
 
@@ -247,7 +247,7 @@ test('when given IPv4 addresses should accept CIDR notation', function (t) {
   const req = createReq('10.0.0.1', {
     'x-forwarded-for': '192.168.0.1, 10.0.0.200'
   })
-  t.strictEqual(proxyaddr(req, '10.0.0.2/26'), '10.0.0.200')
+  t.equal(proxyaddr(req, '10.0.0.2/26'), '10.0.0.200')
   t.end()
 })
 
@@ -255,7 +255,7 @@ test('when given IPv4 addresses should accept netmask notation', function (t) {
   const req = createReq('10.0.0.1', {
     'x-forwarded-for': '192.168.0.1, 10.0.0.200'
   })
-  t.strictEqual(proxyaddr(req, '10.0.0.2/255.255.255.192'), '10.0.0.200')
+  t.equal(proxyaddr(req, '10.0.0.2/255.255.255.192'), '10.0.0.200')
   t.end()
 })
 
@@ -263,7 +263,7 @@ test('when given IPv6 addresses should accept ltesteral IP addresses', function 
   const req = createReq('fe80::1', {
     'x-forwarded-for': '2002:c000:203::1, fe80::2'
   })
-  t.strictEqual(proxyaddr(req, ['fe80::1', 'fe80::2']), '2002:c000:203::1')
+  t.equal(proxyaddr(req, ['fe80::1', 'fe80::2']), '2002:c000:203::1')
   t.end()
 })
 
@@ -271,7 +271,7 @@ test('when given IPv6 addresses should accept CIDR notation', function (t) {
   const req = createReq('fe80::1', {
     'x-forwarded-for': '2002:c000:203::1, fe80::ff00'
   })
-  t.strictEqual(proxyaddr(req, 'fe80::/125'), 'fe80::ff00')
+  t.equal(proxyaddr(req, 'fe80::/125'), 'fe80::ff00')
   t.end()
 })
 
@@ -279,7 +279,7 @@ test('with IP version mixed should match respective versions', function (t) {
   const req = createReq('::1', {
     'x-forwarded-for': '2002:c000:203::1'
   })
-  t.strictEqual(proxyaddr(req, ['127.0.0.1', '::1']), '2002:c000:203::1')
+  t.equal(proxyaddr(req, ['127.0.0.1', '::1']), '2002:c000:203::1')
   t.end()
 })
 
@@ -287,7 +287,7 @@ test('with IP version mixed should not match IPv4 to IPv6', function (t) {
   const req = createReq('::1', {
     'x-forwarded-for': '2002:c000:203::1'
   })
-  t.strictEqual(proxyaddr(req, '127.0.0.1'), '::1')
+  t.equal(proxyaddr(req, '127.0.0.1'), '::1')
   t.end()
 })
 
@@ -295,7 +295,7 @@ test('when IPv4-mapped IPv6 addresses should match IPv4 trust to IPv6 request', 
   const req = createReq('::ffff:a00:1', {
     'x-forwarded-for': '192.168.0.1, 10.0.0.2'
   })
-  t.strictEqual(proxyaddr(req, ['10.0.0.1', '10.0.0.2']), '192.168.0.1')
+  t.equal(proxyaddr(req, ['10.0.0.1', '10.0.0.2']), '192.168.0.1')
   t.end()
 })
 
@@ -303,7 +303,7 @@ test('when IPv4-mapped IPv6 addresses should match IPv4 netmask trust to IPv6 re
   const req = createReq('::ffff:a00:1', {
     'x-forwarded-for': '192.168.0.1, 10.0.0.2'
   })
-  t.strictEqual(proxyaddr(req, ['10.0.0.1/16']), '192.168.0.1')
+  t.equal(proxyaddr(req, ['10.0.0.1/16']), '192.168.0.1')
   t.end()
 })
 
@@ -311,7 +311,7 @@ test('when IPv4-mapped IPv6 addresses should match IPv6 trust to IPv4 request', 
   const req = createReq('10.0.0.1', {
     'x-forwarded-for': '192.168.0.1, 10.0.0.2'
   })
-  t.strictEqual(proxyaddr(req, ['::ffff:a00:1', '::ffff:a00:2']), '192.168.0.1')
+  t.equal(proxyaddr(req, ['::ffff:a00:1', '::ffff:a00:2']), '192.168.0.1')
   t.end()
 })
 
@@ -319,7 +319,7 @@ test('when IPv4-mapped IPv6 addresses should match CIDR notation for IPv4-mapped
   const req = createReq('10.0.0.1', {
     'x-forwarded-for': '192.168.0.1, 10.0.0.200'
   })
-  t.strictEqual(proxyaddr(req, '::ffff:a00:2/122'), '10.0.0.200')
+  t.equal(proxyaddr(req, '::ffff:a00:2/122'), '10.0.0.200')
   t.end()
 })
 
@@ -327,7 +327,7 @@ test('when IPv4-mapped IPv6 addresses should match CIDR notation for IPv4-mapped
   const req = createReq('10.0.0.1', {
     'x-forwarded-for': '192.168.0.1, 10.0.0.200'
   })
-  t.strictEqual(proxyaddr(req, ['::ffff:a00:2/122', 'fe80::/125']), '10.0.0.200')
+  t.equal(proxyaddr(req, ['::ffff:a00:2/122', 'fe80::/125']), '10.0.0.200')
   t.end()
 })
 
@@ -335,7 +335,7 @@ test('when IPv4-mapped IPv6 addresses should match CIDR notation for IPv4-mapped
   const req = createReq('10.0.0.1', {
     'x-forwarded-for': '192.168.0.1, 10.0.0.200'
   })
-  t.strictEqual(proxyaddr(req, ['::ffff:a00:2/122', '127.0.0.1']), '10.0.0.200')
+  t.equal(proxyaddr(req, ['::ffff:a00:2/122', '127.0.0.1']), '10.0.0.200')
   t.end()
 })
 
@@ -343,7 +343,7 @@ test('when given predefined names should accept single pre-defined name', functi
   const req = createReq('fe80::1', {
     'x-forwarded-for': '2002:c000:203::1, fe80::2'
   })
-  t.strictEqual(proxyaddr(req, 'linklocal'), '2002:c000:203::1')
+  t.equal(proxyaddr(req, 'linklocal'), '2002:c000:203::1')
   t.end()
 })
 
@@ -351,7 +351,7 @@ test('when given predefined names should accept multiple pre-defined names', fun
   const req = createReq('::1', {
     'x-forwarded-for': '2002:c000:203::1, fe80::2'
   })
-  t.strictEqual(proxyaddr(req, ['loopback', 'linklocal']), '2002:c000:203::1')
+  t.equal(proxyaddr(req, ['loopback', 'linklocal']), '2002:c000:203::1')
   t.end()
 })
 
@@ -359,7 +359,7 @@ test('when header contains non-ip addresses should stop at first non-ip after tr
   const req = createReq('127.0.0.1', {
     'x-forwarded-for': 'myrouter, 127.0.0.1, proxy'
   })
-  t.strictEqual(proxyaddr(req, '127.0.0.1'), 'proxy')
+  t.equal(proxyaddr(req, '127.0.0.1'), 'proxy')
   t.end()
 })
 
@@ -367,7 +367,7 @@ test('when header contains non-ip addresses should stop at first malformed ip af
   const req = createReq('127.0.0.1', {
     'x-forwarded-for': 'myrouter, 127.0.0.1, ::8:8:8:8:8:8:8:8:8'
   })
-  t.strictEqual(proxyaddr(req, '127.0.0.1'), '::8:8:8:8:8:8:8:8:8')
+  t.equal(proxyaddr(req, '127.0.0.1'), '::8:8:8:8:8:8:8:8:8')
   t.end()
 })
 
@@ -381,7 +381,7 @@ test('when header contains non-ip addresses should provide all values to functio
     return log.push(Array.prototype.slice.call(arguments))
   })
 
-  t.deepEqual(log, [
+  t.same(log, [
     ['127.0.0.1', 0],
     ['proxy', 1],
     ['127.0.0.1', 2]
@@ -391,7 +391,7 @@ test('when header contains non-ip addresses should provide all values to functio
 
 test('when socket address undefined should return undefined as address', function (t) {
   const req = createReq(undefined)
-  t.strictEqual(proxyaddr(req, '127.0.0.1'), undefined)
+  t.equal(proxyaddr(req, '127.0.0.1'), undefined)
   t.end()
 })
 
@@ -399,7 +399,7 @@ test('when socket address undefined should return undefined even wtesth trusted 
   const req = createReq(undefined, {
     'x-forwarded-for': '127.0.0.1, 10.0.0.1'
   })
-  t.strictEqual(proxyaddr(req, '127.0.0.1'), undefined)
+  t.equal(proxyaddr(req, '127.0.0.1'), undefined)
   t.end()
 })
 
