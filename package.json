@@ -18,14 +18,14 @@
   },
   "homepage": "https://github.com/fastify/proxy-addr#readme",
   "dependencies": {
-    "@fastify/forwarded": "^1.0.0",
+    "@fastify/forwarded": "^2.0.0",
     "ipaddr.js": "^2.0.0"
   },
   "devDependencies": {
     "beautify-benchmark": "0.2.4",
     "benchmark": "2.1.4",
     "standard": "^17.0.0",
-    "tap": "^14.11.0"
+    "tap": "^16.0.0"
   },
   "files": [
     "LICENSE",

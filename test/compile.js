@@ -9,12 +9,12 @@ test('trust arg should be required', function (t) {
 })
 
 test('trust arg should accept an array', function (t) {
-  t.strictEqual(typeof proxyaddr.compile([]), 'function')
+  t.equal(typeof proxyaddr.compile([]), 'function')
   t.end()
 })
 
 test('trust arg should accept a string', function (t) {
-  t.strictEqual(typeof proxyaddr.compile('127.0.0.1'), 'function')
+  t.equal(typeof proxyaddr.compile('127.0.0.1'), 'function')
   t.end()
 })
 
@@ -24,27 +24,27 @@ test('trust arg should reject a number', function (t) {
 })
 
 test('trust arg should accept IPv4', function (t) {
-  t.strictEqual(typeof proxyaddr.compile('127.0.0.1'), 'function')
+  t.equal(typeof proxyaddr.compile('127.0.0.1'), 'function')
   t.end()
 })
 
 test('trust arg should accept IPv6', function (t) {
-  t.strictEqual(typeof proxyaddr.compile('::1'), 'function')
+  t.equal(typeof proxyaddr.compile('::1'), 'function')
   t.end()
 })
 
 test('trust arg should accept IPv4-style IPv6', function (t) {
-  t.strictEqual(typeof proxyaddr.compile('::ffff:127.0.0.1'), 'function')
+  t.equal(typeof proxyaddr.compile('::ffff:127.0.0.1'), 'function')
   t.end()
 })
 
 test('trust arg should accept pre-defined names', function (t) {
-  t.strictEqual(typeof proxyaddr.compile('loopback'), 'function')
+  t.equal(typeof proxyaddr.compile('loopback'), 'function')
   t.end()
 })
 
 test('trust arg should accept pre-defined names in array', function (t) {
-  t.strictEqual(typeof proxyaddr.compile(['loopback', '10.0.0.1']), 'function')
+  t.equal(typeof proxyaddr.compile(['loopback', '10.0.0.1']), 'function')
   t.end()
 })
 
@@ -64,7 +64,7 @@ test('trust arg should reject bad CIDR', function (t) {
 
 test('trust arg should not alter input array', function (t) {
   const arr = ['loopback', '10.0.0.1']
-  t.strictEqual(typeof proxyaddr.compile(arr), 'function')
-  t.deepEqual(arr, ['loopback', '10.0.0.1'])
+  t.equal(typeof proxyaddr.compile(arr), 'function')
+  t.same(arr, ['loopback', '10.0.0.1'])
   t.end()
 })
