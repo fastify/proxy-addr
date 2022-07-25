@@ -11,7 +11,7 @@ Forked from https://github.com/jshttp/proxy-addr to address https://github.com/j
 ## Install
 
 ```sh
-$ npm install @fastify/proxy-addr
+$ npm i @fastify/proxy-addr
 ```
 
 ## API
