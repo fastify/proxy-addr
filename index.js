@@ -13,6 +13,8 @@
  */
 
 module.exports = proxyaddr
+module.exports.default = proxyaddr
+module.exports.proxyaddr = proxyaddr
 module.exports.all = alladdrs
 module.exports.compile = compile
 
