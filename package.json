@@ -2,6 +2,8 @@
   "name": "@fastify/proxy-addr",
   "description": "Determine address of proxied request",
   "version": "4.0.0",
+  "main": "index.js",
+  "types": "types/index.d.ts",
   "author": "Douglas Christopher Wilson <doug@somethingdoug.com>",
   "license": "MIT",
   "keywords": [
@@ -22,18 +24,18 @@
     "ipaddr.js": "^2.0.0"
   },
   "devDependencies": {
+    "@types/node": "^18.11.11",
     "beautify-benchmark": "0.2.4",
     "benchmark": "2.1.4",
     "standard": "^17.0.0",
-    "tap": "^16.0.0"
+    "tap": "^16.0.0",
+    "tsd": "^0.25.0"
   },
-  "files": [
-    "LICENSE",
-    "README.md",
-    "index.js"
-  ],
   "scripts": {
     "bench": "node benchmark/index.js",
-    "test": "standard && tap"
+    "lint": "standard",
+    "test": "npm run test:unit && npm run test:typescript",
+    "test:typescript": "tsd",
+    "test:unit": "tap"
   }
 }
