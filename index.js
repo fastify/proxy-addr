@@ -176,7 +176,9 @@ function parseipNotation (note) {
     ip = ip.toIPv4Address()
   }
 
-  const max = ip.kind() === 'ipv6'
+  const kind = ip.kind()
+
+  const max = kind === 'ipv6'
     ? 128
     : 32
 
@@ -188,7 +190,7 @@ function parseipNotation (note) {
     range = max
   } else if (DIGIT_REGEXP.test(range)) {
     range = parseInt(range, 10)
-  } else if (ip.kind() === 'ipv4' && isIP(range) !== 0) {
+  } else if (kind === 'ipv4' && isIP(range) !== 0) {
     range = parseNetmask(range)
   } else {
     range = null
@@ -198,7 +200,7 @@ function parseipNotation (note) {
     throw new TypeError('invalid range on address: ' + note)
   }
 
-  return [ip, range]
+  return [ip, range, kind]
 }
 
 /**
@@ -269,8 +271,8 @@ function trustMulti (subnets) {
     for (var i = 0; i < subnets.length; i++) {
       const subnet = subnets[i]
       const subnetip = subnet[0]
-      const subnetkind = subnetip.kind()
       const subnetrange = subnet[1]
+      const subnetkind = subnet[2]
       let trusted = ip
 
       if (kind !== subnetkind) {
@@ -307,9 +309,9 @@ function trustMulti (subnets) {
 
 function trustSingle (subnet) {
   const subnetip = subnet[0]
-  const subnetkind = subnetip.kind()
-  const subnetisipv4 = subnetkind === 'ipv4'
   const subnetrange = subnet[1]
+  const subnetkind = subnet[2]
+  const subnetisipv4 = subnetkind === 'ipv4'
 
   return function trust (addr) {
     if (isIP(addr) === 0) return false
