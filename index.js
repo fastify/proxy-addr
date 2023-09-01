@@ -25,6 +25,7 @@ module.exports.compile = compile
 
 const forwarded = require('@fastify/forwarded')
 const ipaddr = require('ipaddr.js')
+const { isIP } = require('net')
 
 /**
  * Variables.
@@ -32,7 +33,6 @@ const ipaddr = require('ipaddr.js')
  */
 
 const DIGIT_REGEXP = /^[0-9]+$/
-const isip = ipaddr.isValid
 const parseip = ipaddr.parse
 
 /**
@@ -165,7 +165,7 @@ function parseipNotation (note) {
     ? note.substring(0, pos)
     : note
 
-  if (!isip(str)) {
+  if (isIP(str) === 0) {
     throw new TypeError('invalid IP address: ' + str)
   }
 
@@ -188,7 +188,7 @@ function parseipNotation (note) {
     range = max
   } else if (DIGIT_REGEXP.test(range)) {
     range = parseInt(range, 10)
-  } else if (ip.kind() === 'ipv4' && isip(range)) {
+  } else if (ip.kind() === 'ipv4' && isIP(range) !== 0) {
     range = parseNetmask(range)
   } else {
     range = null
@@ -259,7 +259,7 @@ function trustNone () {
 
 function trustMulti (subnets) {
   return function trust (addr) {
-    if (!isip(addr)) return false
+    if (isIP(addr) === 0) return false
 
     const ip = parseip(addr)
     let ipconv
@@ -312,7 +312,7 @@ function trustSingle (subnet) {
   const subnetrange = subnet[1]
 
   return function trust (addr) {
-    if (!isip(addr)) return false
+    if (isIP(addr) === 0) return false
 
     let ip = parseip(addr)
     const kind = ip.kind()
