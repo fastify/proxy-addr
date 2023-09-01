@@ -33,7 +33,7 @@ const { isIP } = require('net')
  */
 
 const DIGIT_REGEXP = /^[0-9]+$/
-const parseip = ipaddr.parse
+const parseIp = ipaddr.parse
 
 /**
  * Pre-defined IP ranges.
@@ -41,6 +41,7 @@ const parseip = ipaddr.parse
  */
 
 const IP_RANGES = {
+  __proto__: null,
   linklocal: ['169.254.0.0/16', 'fe80::/10'],
   loopback: ['127.0.0.1/8', '::1/128'],
   uniquelocal: ['10.0.0.0/8', '172.16.0.0/12', '192.168.0.0/16', 'fc00::/7']
@@ -56,23 +57,25 @@ const IP_RANGES = {
  */
 
 function alladdrs (req, trust) {
-  // get addresses
-  const addrs = forwarded(req)
-
   if (!trust) {
     // Return all addresses
-    return addrs
+    return forwarded(req)
   }
 
   if (typeof trust !== 'function') {
     trust = compile(trust)
   }
 
+  // get addresses
+  const addrs = forwarded(req)
+
+  const len = addrs.length - 1
   /* eslint-disable no-var */
-  for (var i = 0; i < addrs.length - 1; i++) {
+  for (var i = 0; i < len; i++) {
     if (trust(addrs[i], i)) continue
 
     addrs.length = i + 1
+    break
   }
 
   return addrs
@@ -104,7 +107,7 @@ function compile (val) {
   for (var i = 0; i < trust.length; i++) {
     val = trust[i]
 
-    if (!Object.prototype.hasOwnProperty.call(IP_RANGES, val)) {
+    if (val in IP_RANGES === false) {
       continue
     }
 
@@ -129,7 +132,7 @@ function compileRangeSubnets (arr) {
 
   /* eslint-disable no-var */
   for (var i = 0; i < arr.length; i++) {
-    rangeSubnets[i] = parseipNotation(arr[i])
+    rangeSubnets[i] = parseIpNotation(arr[i])
   }
 
   return rangeSubnets
@@ -159,7 +162,7 @@ function compileTrust (rangeSubnets) {
  * @private
  */
 
-function parseipNotation (note) {
+function parseIpNotation (note) {
   const pos = note.lastIndexOf('/')
   const str = pos !== -1
     ? note.substring(0, pos)
@@ -169,7 +172,7 @@ function parseipNotation (note) {
     throw new TypeError('invalid IP address: ' + str)
   }
 
-  let ip = parseip(str)
+  let ip = parseIp(str)
 
   if (pos === -1 && ip.kind() === 'ipv6' && ip.isIPv4MappedAddress()) {
     // Store as IPv4
@@ -211,7 +214,7 @@ function parseipNotation (note) {
  */
 
 function parseNetmask (netmask) {
-  const ip = parseip(netmask)
+  const ip = parseIp(netmask)
   const kind = ip.kind()
 
   return kind === 'ipv4'
@@ -236,10 +239,31 @@ function proxyaddr (req, trust) {
     throw new TypeError('trust argument is required')
   }
 
-  const addrs = alladdrs(req, trust)
-  const addr = addrs[addrs.length - 1]
+  if (typeof trust !== 'function') {
+    trust = compile(trust)
+  }
 
-  return addr
+  // get addresses
+  const addrs = forwarded(req)
+
+  switch (addrs.length) {
+    case 1:
+      return addrs[0]
+    case 2:
+      return trust(addrs[0], 0)
+        ? addrs[1]
+        : addrs[0]
+    default: {
+      /* eslint-disable no-var */
+      for (var i = 0; i < addrs.length - 1; i++) {
+        if (trust(addrs[i], i)) continue
+
+        return addrs[i]
+      }
+
+      return addrs[addrs.length - 1]
+    }
+  }
 }
 
 /**
@@ -263,7 +287,7 @@ function trustMulti (subnets) {
   return function trust (addr) {
     if (isIP(addr) === 0) return false
 
-    const ip = parseip(addr)
+    const ip = parseIp(addr)
     let ipconv
     const kind = ip.kind()
 
@@ -316,7 +340,7 @@ function trustSingle (subnet) {
   return function trust (addr) {
     if (isIP(addr) === 0) return false
 
-    let ip = parseip(addr)
+    let ip = parseIp(addr)
     const kind = ip.kind()
 
     if (kind !== subnetkind) {

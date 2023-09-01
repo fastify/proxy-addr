@@ -1,3 +1,4 @@
+'use strict'
 
 /**
  * Globals for benchmark.js
