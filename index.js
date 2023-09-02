@@ -36,20 +36,6 @@ const IP_RANGES = {
   uniquelocal: ['10.0.0.0/8', '172.16.0.0/12', '192.168.0.0/16', 'fc00::/7']
 }
 
-// number of zeroes in octet
-const NETMASK_PREFIX = {
-  __proto__: null,
-  '0': 8,
-  '128': 7,
-  '192': 6,
-  '224': 5,
-  '240': 4,
-  '248': 3,
-  '252': 2,
-  '254': 1,
-  '255': 0
-}
-
 /**
  * Get all addresses in the request, optionally stopping
  * at the first untrusted.
@@ -59,7 +45,7 @@ const NETMASK_PREFIX = {
  * @public
  */
 
-function alladdrs(req, trust) {
+function alladdrs (req, trust) {
   if (!trust) {
     // Return all addresses
     return forwarded(req)
@@ -91,7 +77,7 @@ function alladdrs(req, trust) {
  * @private
  */
 
-function compile(val) {
+function compile (val) {
   if (!val) {
     throw new TypeError('argument is required')
   }
@@ -130,7 +116,7 @@ function compile(val) {
  * @private
  */
 
-function compileRangeSubnets(arr) {
+function compileRangeSubnets (arr) {
   const rangeSubnets = new Array(arr.length)
 
   /* eslint-disable no-var */
@@ -148,7 +134,7 @@ function compileRangeSubnets(arr) {
  * @private
  */
 
-function compileTrust(rangeSubnets) {
+function compileTrust (rangeSubnets) {
   // Return optimized function based on length
   const len = rangeSubnets.length
   return len === 0
@@ -165,7 +151,7 @@ function compileTrust(rangeSubnets) {
  * @private
  */
 
-function parseIpNotation(note) {
+function parseIpNotation (note) {
   const pos = note.lastIndexOf('/')
   const str = pos !== -1
     ? note.substring(0, pos)
@@ -177,7 +163,7 @@ function parseIpNotation(note) {
 
   let ip = parseIp(str)
 
-  if (pos === -1 && ip.kind() === 'ipv6' && ip.isIPv4MappedAddress()) {
+  if (pos === -1 && ip.kind() === 'ipv6' && isIPv4MappedIPv6Address(str)) {
     // Store as IPv4
     ip = ip.toIPv4Address()
   }
@@ -210,43 +196,6 @@ function parseIpNotation(note) {
 }
 
 /**
- * Parse netmask string into CIDR range.
- *
- * @param {String} netmask
- * @private
- */
-
-function prefixLengthFromSubnetMask(netmask) {
-  let cidr = 0
-
-  const octets = netmask.split('.')
-  let octet = octets[3]
-  let i = 3
-  let zeros = 0
-  let stop = false
-
-  while (i > -1) {
-    if (octet in NETMASK_PREFIX) {
-      zeros = NETMASK_PREFIX[octet];
-      if (stop && zeros !== 0) {
-        return null;
-      }
-
-      if (zeros !== 8) {
-        stop = true;
-      }
-
-      cidr += zeros;
-    } else {
-      return null;
-    }
-    octet = octets[--i];
-  }
-
-  return 32 - cidr;
-}
-
-/**
  * Determine address of proxied request.
  *
  * @param {Object} request
@@ -254,7 +203,7 @@ function prefixLengthFromSubnetMask(netmask) {
  * @public
  */
 
-function proxyaddr(req, trust) {
+function proxyaddr (req, trust) {
   if (!req) {
     throw new TypeError('req argument is required')
   }
@@ -296,7 +245,7 @@ function proxyaddr(req, trust) {
  * @private
  */
 
-function trustNone() {
+function trustNone () {
   return false
 }
 
@@ -307,13 +256,16 @@ function trustNone() {
  * @private
  */
 
-function trustMulti(subnets) {
-  return function trust(addr) {
+function trustMulti (subnets) {
+  return function trust (addr) {
     if (isIP(addr) === 0) return false
 
     const ip = parseIp(addr)
     let ipconv
     const kind = ip.kind()
+    const isIPv4MappedAddress = kind === 'ipv6'
+      ? isIPv4MappedIPv6Address(addr)
+      : false
 
     /* eslint-disable no-var */
     for (var i = 0; i < subnets.length; i++) {
@@ -324,7 +276,7 @@ function trustMulti(subnets) {
       let trusted = ip
 
       if (kind !== subnetkind) {
-        if (subnetkind === 'ipv4' && !ip.isIPv4MappedAddress()) {
+        if (subnetkind === 'ipv4' && !isIPv4MappedAddress) {
           // Incompatible IP addresses
           continue
         }
@@ -355,20 +307,23 @@ function trustMulti(subnets) {
  * @private
  */
 
-function trustSingle(subnet) {
+function trustSingle (subnet) {
   const subnetip = subnet[0]
   const subnetrange = subnet[1]
   const subnetkind = subnet[2]
   const subnetisipv4 = subnetkind === 'ipv4'
 
-  return function trust(addr) {
+  return function trust (addr) {
     if (isIP(addr) === 0) return false
 
     let ip = parseIp(addr)
     const kind = ip.kind()
+    const isIPv4MappedAddress = kind === 'ipv6'
+      ? isIPv4MappedIPv6Address(addr)
+      : false
 
     if (kind !== subnetkind) {
-      if (subnetisipv4 && !ip.isIPv4MappedAddress()) {
+      if (subnetisipv4 && !isIPv4MappedAddress) {
         // Incompatible IP addresses
         return false
       }
@@ -383,6 +338,101 @@ function trustSingle(subnet) {
   }
 }
 
+// number of zeroes in octet
+const NETMASK_PREFIX = {
+  __proto__: null,
+  0: 8,
+  128: 7,
+  192: 6,
+  224: 5,
+  240: 4,
+  248: 3,
+  252: 2,
+  254: 1,
+  255: 0
+}
+
+/**
+ * Parse netmask string into CIDR range.
+ *
+ * @param {String} netmask
+ * @private
+ */
+function prefixLengthFromSubnetMask (netmask) {
+  let cidr = 0
+
+  const octets = netmask.split('.')
+  let octet = octets[3]
+  let i = 3
+  let zeros = 0
+  let stop = false
+
+  while (i > -1) {
+    if (octet in NETMASK_PREFIX) {
+      zeros = NETMASK_PREFIX[octet]
+      if (stop && zeros !== 0) {
+        return null
+      }
+
+      if (zeros !== 8) {
+        stop = true
+      }
+
+      cidr += zeros
+    } else {
+      return null
+    }
+    octet = octets[--i]
+  }
+
+  return 32 - cidr
+}
+
+function isIPv4MappedIPv6Address (addr) {
+  if (
+    addr[0] === ':' &&
+    addr[1] === ':'
+  ) {
+    if (
+      addr[2] === 'f' &&
+      addr[3] === 'f' &&
+      addr[4] === 'f' &&
+      addr[5] === 'f' &&
+      addr[6] === ':'
+    ) {
+      return true
+    } else if (isIP(addr.slice(2)) === 4) {
+      return true
+    }
+  }
+
+  let group = 0
+  for (var i = 0; i < addr.length; ++i) {
+    switch (addr[i]) {
+      case ':':
+        if (group === 5) {
+          return true
+        }
+        ++group
+        break
+      case '0':
+        if (group === 5) {
+          return false
+        }
+        break
+      case 'f':
+        if (group !== 5) {
+          return false
+        }
+        break
+      default:
+        return false
+    }
+  }
+
+  return false
+}
+
 /**
  * Module exports.
  * @public
@@ -394,3 +444,4 @@ module.exports.proxyaddr = proxyaddr
 module.exports.all = alladdrs
 module.exports.compile = compile
 module.exports.prefixLengthFromSubnetMask = prefixLengthFromSubnetMask
+module.exports.isIPv4MappedIPv6Address = isIPv4MappedIPv6Address
