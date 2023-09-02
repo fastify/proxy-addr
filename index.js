@@ -113,10 +113,11 @@ function compile (val) {
  */
 
 function compileRangeSubnets (arr) {
-  const rangeSubnets = new Array(arr.length)
+  const len = arr.length
+  const rangeSubnets = new Array(len)
 
   /* eslint-disable no-var */
-  for (var i = 0; i < arr.length; i++) {
+  for (var i = 0; i < len; i++) {
     rangeSubnets[i] = parseIpNotation(arr[i])
   }
 
