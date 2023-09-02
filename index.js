@@ -51,9 +51,7 @@ function alladdrs (req, trust) {
     return forwarded(req)
   }
 
-  if (typeof trust !== 'function') {
-    trust = compile(trust)
-  }
+  typeof trust !== 'function' && (trust = compile(trust))
 
   // get addresses
   const addrs = forwarded(req)
@@ -96,14 +94,12 @@ function compile (val) {
   for (var i = 0; i < trust.length; i++) {
     val = trust[i]
 
-    if (val in IP_RANGES === false) {
-      continue
+    if (val in IP_RANGES) {
+      // Splice in pre-defined range
+      val = IP_RANGES[val]
+      trust.splice.apply(trust, [i, 1].concat(val))
+      i += val.length - 1
     }
-
-    // Splice in pre-defined range
-    val = IP_RANGES[val]
-    trust.splice.apply(trust, [i, 1].concat(val))
-    i += val.length - 1
   }
 
   return compileTrust(compileRangeSubnets(trust))
@@ -212,9 +208,7 @@ function proxyaddr (req, trust) {
     throw new TypeError('trust argument is required')
   }
 
-  if (typeof trust !== 'function') {
-    trust = compile(trust)
-  }
+  typeof trust !== 'function' && (trust = compile(trust))
 
   // get addresses
   const addrs = forwarded(req)
@@ -229,9 +223,9 @@ function proxyaddr (req, trust) {
     default: {
       /* eslint-disable no-var */
       for (var i = 0; i < addrs.length - 1; i++) {
-        if (trust(addrs[i], i)) continue
-
-        return addrs[i]
+        if (trust(addrs[i], i) === false) {
+          return addrs[i]
+        }
       }
 
       return addrs[addrs.length - 1]
