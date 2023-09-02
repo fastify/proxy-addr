@@ -123,7 +123,7 @@ test('trust should be invoked as trust(addr, i)', function (t) {
   t.end()
 })
 
-test('with all trusted should return socket address wtesth no headers', function (t) {
+test('with all trusted should return socket address with no headers', function (t) {
   const req = createReq('127.0.0.1')
   t.equal(proxyaddr(req, all), '127.0.0.1')
   t.end()
@@ -145,13 +145,13 @@ test('with all trusted should return furthest header value', function (t) {
   t.end()
 })
 
-test('with none trusted should return socket address wtesth no headers', function (t) {
+test('with none trusted should return socket address with no headers', function (t) {
   const req = createReq('127.0.0.1')
   t.equal(proxyaddr(req, none), '127.0.0.1')
   t.end()
 })
 
-test('with none trusted should return socket address wtesth headers', function (t) {
+test('with none trusted should return socket address with headers', function (t) {
   const req = createReq('127.0.0.1', {
     'x-forwarded-for': '10.0.0.1, 10.0.0.2'
   })
@@ -159,7 +159,7 @@ test('with none trusted should return socket address wtesth headers', function (
   t.end()
 })
 
-test('with some trusted should return socket address wtesth no headers', function (t) {
+test('with some trusted should return socket address with no headers', function (t) {
   const req = createReq('127.0.0.1')
   t.equal(proxyaddr(req, trust10x), '127.0.0.1')
   t.end()
@@ -197,7 +197,7 @@ test('with some trusted should not skip untrusted', function (t) {
   t.end()
 })
 
-test('when given array should accept ltesteral IP addresses', function (t) {
+test('when given array should accept literal IP addresses', function (t) {
   const req = createReq('10.0.0.1', {
     'x-forwarded-for': '192.168.0.1, 10.0.0.2'
   })
@@ -227,7 +227,7 @@ test('when array empty should return socket address ', function (t) {
   t.end()
 })
 
-test('when array empty should return socket address wtesth headers', function (t) {
+test('when array empty should return socket address with headers', function (t) {
   const req = createReq('127.0.0.1', {
     'x-forwarded-for': '10.0.0.1, 10.0.0.2'
   })
@@ -235,7 +235,7 @@ test('when array empty should return socket address wtesth headers', function (t
   t.end()
 })
 
-test('when given IPv4 addresses should accept ltesteral IP addresses', function (t) {
+test('when given IPv4 addresses should accept literal IP addresses', function (t) {
   const req = createReq('10.0.0.1', {
     'x-forwarded-for': '192.168.0.1, 10.0.0.2'
   })
@@ -259,7 +259,7 @@ test('when given IPv4 addresses should accept netmask notation', function (t) {
   t.end()
 })
 
-test('when given IPv6 addresses should accept ltesteral IP addresses', function (t) {
+test('when given IPv6 addresses should accept literal IP addresses', function (t) {
   const req = createReq('fe80::1', {
     'x-forwarded-for': '2002:c000:203::1, fe80::2'
   })
@@ -323,7 +323,7 @@ test('when IPv4-mapped IPv6 addresses should match CIDR notation for IPv4-mapped
   t.end()
 })
 
-test('when IPv4-mapped IPv6 addresses should match CIDR notation for IPv4-mapped address mixed wtesth IPv6 CIDR', function (t) {
+test('when IPv4-mapped IPv6 addresses should match CIDR notation for IPv4-mapped address mixed with IPv6 CIDR', function (t) {
   const req = createReq('10.0.0.1', {
     'x-forwarded-for': '192.168.0.1, 10.0.0.200'
   })
@@ -331,7 +331,7 @@ test('when IPv4-mapped IPv6 addresses should match CIDR notation for IPv4-mapped
   t.end()
 })
 
-test('when IPv4-mapped IPv6 addresses should match CIDR notation for IPv4-mapped address mixed wtesth IPv4 addresses', function (t) {
+test('when IPv4-mapped IPv6 addresses should match CIDR notation for IPv4-mapped address mixed with IPv4 addresses', function (t) {
   const req = createReq('10.0.0.1', {
     'x-forwarded-for': '192.168.0.1, 10.0.0.200'
   })
@@ -395,7 +395,7 @@ test('when socket address undefined should return undefined as address', functio
   t.end()
 })
 
-test('when socket address undefined should return undefined even wtesth trusted headers', function (t) {
+test('when socket address undefined should return undefined even with trusted headers', function (t) {
   const req = createReq(undefined, {
     'x-forwarded-for': '127.0.0.1, 10.0.0.1'
   })
