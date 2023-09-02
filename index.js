@@ -59,10 +59,10 @@ function alladdrs (req, trust) {
   const len = addrs.length - 1
   /* eslint-disable no-var */
   for (var i = 0; i < len; i++) {
-    if (trust(addrs[i], i)) continue
-
-    addrs.length = i + 1
-    break
+    if (trust(addrs[i], i) === false) {
+      addrs.length = i + 1
+      break
+    }
   }
 
   return addrs
