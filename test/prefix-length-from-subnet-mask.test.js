@@ -4,7 +4,7 @@ const { test } = require('tap')
 const { prefixLengthFromSubnetMask } = require('..')
 
 test('prefixLengthFromSubnetMask returns proper CIDR notation for standard IPv4 masks', (t) => {
-  t.plan(35)
+  t.plan(44)
 
   // positive cases
   t.equal(prefixLengthFromSubnetMask('255.255.255.255'), 32)
@@ -42,6 +42,15 @@ test('prefixLengthFromSubnetMask returns proper CIDR notation for standard IPv4 
   t.equal(prefixLengthFromSubnetMask('0.0.0.0'), 0)
 
   // negative cases
+  t.equal(prefixLengthFromSubnetMask('255.255.255.253'), null)
+  t.equal(prefixLengthFromSubnetMask('168.192.255.0'), null)
   t.equal(prefixLengthFromSubnetMask('192.168.255.0'), null)
   t.equal(prefixLengthFromSubnetMask('255.0.255.0'), null)
+  t.equal(prefixLengthFromSubnetMask('255.0.255.42'), null)
+  t.equal(prefixLengthFromSubnetMask('255.0.42.0'), null)
+  t.equal(prefixLengthFromSubnetMask('255.42.0.0'), null)
+  t.equal(prefixLengthFromSubnetMask('42.0.0.0'), null)
+  t.equal(prefixLengthFromSubnetMask('255.255.42.254'), null)
+  t.equal(prefixLengthFromSubnetMask('255.255.192.255'), null)
+  t.equal(prefixLengthFromSubnetMask('192.255.255.255'), null)
 })

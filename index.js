@@ -338,18 +338,28 @@ function trustSingle (subnet) {
   }
 }
 
-// number of zeroes in octet
-const NETMASK_PREFIX = {
-  __proto__: null,
-  0: 8,
-  128: 7,
-  192: 6,
-  224: 5,
-  240: 4,
-  248: 3,
-  252: 2,
-  254: 1,
-  255: 0
+function octetToZeros (ip, start, end) {
+  return (
+    (ip[start] === '0' && 9) ||
+    ((end - start) === 3 && (
+      (ip[start] === '1' && (
+        (ip[start + 1] === '2' && ip[start + 2] === '8' && 8) ||
+        (ip[start + 1] === '9' && ip[start + 2] === '2' && 7)
+      )) ||
+      (ip[start] === '2' && (
+        (ip[start + 1] === '2' && ip[start + 2] === '4' && 6) ||
+        (ip[start + 1] === '4' && (
+          (ip[start + 2] === '0' && 5) ||
+          (ip[start + 2] === '8' && 4)
+        )) ||
+        (ip[start + 1] === '5' && (
+          (ip[start + 2] === '2' && 3) ||
+          (ip[start + 2] === '4' && 2) ||
+          (ip[start + 2] === '5' && 1)
+        ))
+      ))
+    ))
+  ) || 0
 }
 
 /**
@@ -359,33 +369,37 @@ const NETMASK_PREFIX = {
  * @private
  */
 function prefixLengthFromSubnetMask (netmask) {
+  let stop = false
   let cidr = 0
 
-  const octets = netmask.split('.')
-  let octet = octets[3]
-  let i = 3
-  let zeros = 0
-  let stop = false
+  let end = netmask.length
+  let start = netmask.lastIndexOf('.', end - 1)
+  let zeros = octetToZeros(netmask, start + 1, end)
+  if (zeros === 0) return null
+  zeros !== 9 && (stop = true)
+  cidr += zeros
 
-  while (i > -1) {
-    if (octet in NETMASK_PREFIX) {
-      zeros = NETMASK_PREFIX[octet]
-      if (stop && zeros !== 0) {
-        return null
-      }
+  end = start
+  start = netmask.lastIndexOf('.', end - 1)
+  zeros = octetToZeros(netmask, start + 1, end)
+  if (zeros !== 1 && (stop === true || zeros === 0)) return null
+  stop === false && zeros !== 9 && (stop = true)
+  cidr += zeros
 
-      if (zeros !== 8) {
-        stop = true
-      }
+  end = start
+  start = netmask.lastIndexOf('.', end - 1)
+  zeros = octetToZeros(netmask, start + 1, end)
+  if (zeros !== 1 && (stop === true || zeros === 0)) return null
+  stop === false && zeros !== 9 && (stop = true)
+  cidr += zeros
 
-      cidr += zeros
-    } else {
-      return null
-    }
-    octet = octets[--i]
-  }
+  end = start
+  zeros = octetToZeros(netmask, 0, end)
+  if (zeros !== 1 && (stop === true || zeros === 0)) return null
+  stop === false && zeros !== 9 && (stop = true)
+  cidr += zeros
 
-  return 32 - cidr
+  return 36 - cidr
 }
 
 function isIPv4MappedIPv6Address (addr) {
