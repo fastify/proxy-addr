@@ -8,17 +8,6 @@
 'use strict'
 
 /**
- * Module exports.
- * @public
- */
-
-module.exports = proxyaddr
-module.exports.default = proxyaddr
-module.exports.proxyaddr = proxyaddr
-module.exports.all = alladdrs
-module.exports.compile = compile
-
-/**
  * Module dependencies.
  * @private
  */
@@ -47,6 +36,20 @@ const IP_RANGES = {
   uniquelocal: ['10.0.0.0/8', '172.16.0.0/12', '192.168.0.0/16', 'fc00::/7']
 }
 
+// number of zeroes in octet
+const NETMASK_PREFIX = {
+  __proto__: null,
+  '0': 8,
+  '128': 7,
+  '192': 6,
+  '224': 5,
+  '240': 4,
+  '248': 3,
+  '252': 2,
+  '254': 1,
+  '255': 0
+}
+
 /**
  * Get all addresses in the request, optionally stopping
  * at the first untrusted.
@@ -56,7 +59,7 @@ const IP_RANGES = {
  * @public
  */
 
-function alladdrs (req, trust) {
+function alladdrs(req, trust) {
   if (!trust) {
     // Return all addresses
     return forwarded(req)
@@ -88,7 +91,7 @@ function alladdrs (req, trust) {
  * @private
  */
 
-function compile (val) {
+function compile(val) {
   if (!val) {
     throw new TypeError('argument is required')
   }
@@ -127,7 +130,7 @@ function compile (val) {
  * @private
  */
 
-function compileRangeSubnets (arr) {
+function compileRangeSubnets(arr) {
   const rangeSubnets = new Array(arr.length)
 
   /* eslint-disable no-var */
@@ -145,7 +148,7 @@ function compileRangeSubnets (arr) {
  * @private
  */
 
-function compileTrust (rangeSubnets) {
+function compileTrust(rangeSubnets) {
   // Return optimized function based on length
   const len = rangeSubnets.length
   return len === 0
@@ -162,7 +165,7 @@ function compileTrust (rangeSubnets) {
  * @private
  */
 
-function parseIpNotation (note) {
+function parseIpNotation(note) {
   const pos = note.lastIndexOf('/')
   const str = pos !== -1
     ? note.substring(0, pos)
@@ -193,8 +196,8 @@ function parseIpNotation (note) {
     range = max
   } else if (DIGIT_REGEXP.test(range)) {
     range = parseInt(range, 10)
-  } else if (kind === 'ipv4' && isIP(range) !== 0) {
-    range = parseNetmask(range)
+  } else if (kind === 'ipv4' && isIP(range) === 4) {
+    range = prefixLengthFromSubnetMask(range)
   } else {
     range = null
   }
@@ -213,13 +216,34 @@ function parseIpNotation (note) {
  * @private
  */
 
-function parseNetmask (netmask) {
-  const ip = parseIp(netmask)
-  const kind = ip.kind()
+function prefixLengthFromSubnetMask(netmask) {
+  let cidr = 0
 
-  return kind === 'ipv4'
-    ? ip.prefixLengthFromSubnetMask()
-    : null
+  const octets = netmask.split('.')
+  let octet = octets[3]
+  let i = 3
+  let zeros = 0
+  let stop = false
+
+  while (i > -1) {
+    if (octet in NETMASK_PREFIX) {
+      zeros = NETMASK_PREFIX[octet];
+      if (stop && zeros !== 0) {
+        return null;
+      }
+
+      if (zeros !== 8) {
+        stop = true;
+      }
+
+      cidr += zeros;
+    } else {
+      return null;
+    }
+    octet = octets[--i];
+  }
+
+  return 32 - cidr;
 }
 
 /**
@@ -230,7 +254,7 @@ function parseNetmask (netmask) {
  * @public
  */
 
-function proxyaddr (req, trust) {
+function proxyaddr(req, trust) {
   if (!req) {
     throw new TypeError('req argument is required')
   }
@@ -272,7 +296,7 @@ function proxyaddr (req, trust) {
  * @private
  */
 
-function trustNone () {
+function trustNone() {
   return false
 }
 
@@ -283,8 +307,8 @@ function trustNone () {
  * @private
  */
 
-function trustMulti (subnets) {
-  return function trust (addr) {
+function trustMulti(subnets) {
+  return function trust(addr) {
     if (isIP(addr) === 0) return false
 
     const ip = parseIp(addr)
@@ -331,13 +355,13 @@ function trustMulti (subnets) {
  * @private
  */
 
-function trustSingle (subnet) {
+function trustSingle(subnet) {
   const subnetip = subnet[0]
   const subnetrange = subnet[1]
   const subnetkind = subnet[2]
   const subnetisipv4 = subnetkind === 'ipv4'
 
-  return function trust (addr) {
+  return function trust(addr) {
     if (isIP(addr) === 0) return false
 
     let ip = parseIp(addr)
@@ -358,3 +382,15 @@ function trustSingle (subnet) {
     return ip.match(subnetip, subnetrange)
   }
 }
+
+/**
+ * Module exports.
+ * @public
+ */
+
+module.exports = proxyaddr
+module.exports.default = proxyaddr
+module.exports.proxyaddr = proxyaddr
+module.exports.all = alladdrs
+module.exports.compile = compile
+module.exports.prefixLengthFromSubnetMask = prefixLengthFromSubnetMask
