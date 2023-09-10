@@ -12,9 +12,9 @@
  * @private
  */
 
+const { isIP } = require('node:net')
 const forwarded = require('@fastify/forwarded')
 const ipaddr = require('ipaddr.js')
-const { isIP } = require('net')
 const { isIPv4MappedIPv6Address } = require('./lib/is-ipv4-mapped-ipv6-address')
 const { prefixLengthFromSubnetMask } = require('./lib/prefix-length-from-subnet-mask')
 /**
