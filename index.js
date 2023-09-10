@@ -32,24 +32,31 @@ const IP_RANGES = {
 }
 
 /**
+ * @callback TrustFunction
+ * @param {string} addr
+ * @param {number} i
+ * @returns {boolean}
+ */
+
+/**
  * Get all addresses in the request, optionally stopping
  * at the first untrusted.
  *
  * @param {Object} request
- * @param {Function|Array|String} [trust]
+ * @param {TrustFunction|Array|String} [trust]
  * @public
  */
 
-function alladdrs (req, trust) {
+function alladdrs (request, trust) {
   if (!trust) {
     // Return all addresses
-    return forwarded(req)
+    return forwarded(request)
   }
 
   typeof trust !== 'function' && (trust = compile(trust))
 
   // get addresses
-  const addrs = forwarded(req)
+  const addrs = forwarded(request)
 
   const len = addrs.length - 1
   /* eslint-disable no-var */
@@ -67,6 +74,7 @@ function alladdrs (req, trust) {
  * Compile argument into trust function.
  *
  * @param {Array|String} val
+ * @returns {TrustFunction}
  * @private
  */
 
@@ -75,6 +83,9 @@ function compile (val) {
     throw new TypeError('argument is required')
   }
 
+  /**
+   * @type {string[]}
+   */
   let trust
 
   if (typeof val === 'string') {
@@ -103,8 +114,9 @@ function compile (val) {
 /**
  * Compile `arr` elements into range subnets.
  *
- * @param {Array} arr
  * @private
+ *
+ * @param {Array} arr
  */
 
 function compileRangeSubnets (arr) {
@@ -122,8 +134,10 @@ function compileRangeSubnets (arr) {
 /**
  * Compile range subnet array into trust function.
  *
- * @param {Array} rangeSubnets
  * @private
+ *
+ * @param {Array} rangeSubnets
+ * @returns {TrustFunction}
  */
 
 function compileTrust (rangeSubnets) {
@@ -139,8 +153,9 @@ function compileTrust (rangeSubnets) {
 /**
  * Parse IP notation string into range subnet.
  *
- * @param {String} note
  * @private
+ *
+ * @param {String} note
  */
 
 function parseIpNotation (note) {
@@ -166,6 +181,9 @@ function parseIpNotation (note) {
     ? 128
     : 32
 
+  /**
+   * @type {number|string}
+   */
   let range = pos !== -1
     ? note.substring(pos + 1, note.length)
     : null
@@ -190,13 +208,14 @@ function parseIpNotation (note) {
 /**
  * Determine address of proxied request.
  *
- * @param {Object} request
- * @param {Function|Array|String} trust
  * @public
+ *
+ * @param {Object} request
+ * @param {TrustFunction|Array|String} trust
  */
 
-function proxyaddr (req, trust) {
-  if (!req) {
+function proxyaddr (request, trust) {
+  if (!request) {
     throw new TypeError('req argument is required')
   }
 
@@ -207,7 +226,7 @@ function proxyaddr (req, trust) {
   typeof trust !== 'function' && (trust = compile(trust))
 
   // get addresses
-  const addrs = forwarded(req)
+  const addrs = forwarded(request)
 
   switch (addrs.length) {
     case 1:
@@ -233,6 +252,8 @@ function proxyaddr (req, trust) {
  * Static trust function to trust nothing.
  *
  * @private
+ *
+ * @type {TrustFunction}
  */
 
 function trustNone () {
@@ -242,8 +263,10 @@ function trustNone () {
 /**
  * Compile trust function for multiple subnets.
  *
- * @param {Array} subnets
  * @private
+ *
+ * @param {Array} subnets
+ * @returns {TrustFunction}
  */
 
 function trustMulti (subnets) {
@@ -293,8 +316,10 @@ function trustMulti (subnets) {
 /**
  * Compile trust function for single subnet.
  *
- * @param {Object} subnet
  * @private
+ * 
+ * @param {Object} subnet
+ * @returns {TrustFunction}
  */
 
 function trustSingle (subnet) {
