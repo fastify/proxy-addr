@@ -3,7 +3,7 @@
 /**
  * Globals for benchmark.js
  */
-const { prefixLengthFromSubnetMask } = require('..')
+const { prefixLengthFromSubnetMask } = require('../lib/prefix-length-from-subnet-mask')
 
 /**
  * Module dependencies.

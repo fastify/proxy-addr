@@ -1,7 +1,7 @@
 'use strict'
 
 const { test } = require('tap')
-const { prefixLengthFromSubnetMask } = require('..')
+const { prefixLengthFromSubnetMask } = require('../lib/prefix-length-from-subnet-mask')
 
 test('prefixLengthFromSubnetMask returns proper CIDR notation for standard IPv4 masks', (t) => {
   t.plan(44)

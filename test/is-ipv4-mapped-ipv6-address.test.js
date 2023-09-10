@@ -1,7 +1,7 @@
 'use strict'
 
 const { test } = require('tap')
-const { isIPv4MappedIPv6Address } = require('..')
+const { isIPv4MappedIPv6Address } = require('../lib/is-ipv4-mapped-ipv6-address.js')
 
 test('isIPv4MappedIPv6Address', (t) => {
   t.plan(23)
