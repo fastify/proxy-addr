@@ -317,7 +317,7 @@ function trustMulti (subnets) {
  * Compile trust function for single subnet.
  *
  * @private
- * 
+ *
  * @param {Object} subnet
  * @returns {TrustFunction}
  */
