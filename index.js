@@ -13,17 +13,11 @@
  */
 
 const { isIP } = require('node:net')
-const forwarded = require('@fastify/forwarded')
-const ipaddr = require('ipaddr.js')
+const { forwarded } = require('@fastify/forwarded')
+const { parse: parseIp } = require('ipaddr.js')
 const { isIPv4MappedIPv6Address } = require('./lib/is-ipv4-mapped-ipv6-address')
 const { prefixLengthFromSubnetMask } = require('./lib/prefix-length-from-subnet-mask')
-/**
- * Variables.
- * @private
- */
-
-const DIGIT_REGEXP = /^[0-9]+$/
-const parseIp = ipaddr.parse
+const { isInteger } = require('./lib/is-integer')
 
 /**
  * Pre-defined IP ranges.
@@ -178,7 +172,7 @@ function parseIpNotation (note) {
 
   if (range === null) {
     range = max
-  } else if (DIGIT_REGEXP.test(range)) {
+  } else if (isInteger(range)) {
     range = parseInt(range, 10)
   } else if (kind === 'ipv4' && isIP(range) === 4) {
     range = prefixLengthFromSubnetMask(range)
