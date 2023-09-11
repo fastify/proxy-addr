@@ -1,4 +1,3 @@
-
 /**
  * Globals for benchmark.js
  */
