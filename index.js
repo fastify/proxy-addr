@@ -31,7 +31,7 @@ const ipaddr = require('ipaddr.js')
  * @private
  */
 
-const DIGIT_REGEXP = /^[0-9]+$/
+const DIGIT_REGEXP = /^\d+$/u
 const isip = ipaddr.isValid
 const parseip = ipaddr.parse
 

@@ -4,13 +4,13 @@ const { test } = require('tap')
 const proxyaddr = require('..')
 
 test('req should be required', function (t) {
-  t.throws(proxyaddr, /req.*required/)
+  t.throws(proxyaddr, /req.*required/u)
   t.end()
 })
 
 test('trust should be required', function (t) {
   const req = createReq('127.0.0.1')
-  t.throws(proxyaddr.bind(null, req), /trust.*required/)
+  t.throws(proxyaddr.bind(null, req), /trust.*required/u)
   t.end()
 })
 
@@ -34,7 +34,7 @@ test('trust should accept a string', function (t) {
 
 test('trust should reject a number', function (t) {
   const req = createReq('127.0.0.1')
-  t.throws(proxyaddr.bind(null, req, 42), /unsupported trust argument/)
+  t.throws(proxyaddr.bind(null, req, 42), /unsupported trust argument/u)
   t.end()
 })
 
@@ -78,30 +78,30 @@ test('trust should not alter input array', function (t) {
 
 test('trust should reject non-IP', function (t) {
   const req = createReq('127.0.0.1')
-  t.throws(proxyaddr.bind(null, req, 'blargh'), /invalid IP address/)
-  t.throws(proxyaddr.bind(null, req, '10.0.300.1'), /invalid IP address/)
-  t.throws(proxyaddr.bind(null, req, '::ffff:30.168.1.9000'), /invalid IP address/)
-  t.throws(proxyaddr.bind(null, req, '-1'), /invalid IP address/)
+  t.throws(proxyaddr.bind(null, req, 'blargh'), /invalid IP address/u)
+  t.throws(proxyaddr.bind(null, req, '10.0.300.1'), /invalid IP address/u)
+  t.throws(proxyaddr.bind(null, req, '::ffff:30.168.1.9000'), /invalid IP address/u)
+  t.throws(proxyaddr.bind(null, req, '-1'), /invalid IP address/u)
   t.end()
 })
 
 test('trust should reject bad CIDR', function (t) {
   const req = createReq('127.0.0.1')
-  t.throws(proxyaddr.bind(null, req, '10.0.0.1/internet'), /invalid range on address/)
-  t.throws(proxyaddr.bind(null, req, '10.0.0.1/6000'), /invalid range on address/)
-  t.throws(proxyaddr.bind(null, req, '::1/6000'), /invalid range on address/)
-  t.throws(proxyaddr.bind(null, req, '::ffff:a00:2/136'), /invalid range on address/)
-  t.throws(proxyaddr.bind(null, req, '::ffff:a00:2/-1'), /invalid range on address/)
+  t.throws(proxyaddr.bind(null, req, '10.0.0.1/internet'), /invalid range on address/u)
+  t.throws(proxyaddr.bind(null, req, '10.0.0.1/6000'), /invalid range on address/u)
+  t.throws(proxyaddr.bind(null, req, '::1/6000'), /invalid range on address/u)
+  t.throws(proxyaddr.bind(null, req, '::ffff:a00:2/136'), /invalid range on address/u)
+  t.throws(proxyaddr.bind(null, req, '::ffff:a00:2/-1'), /invalid range on address/u)
   t.end()
 })
 
 test('trust should reject bad netmask', function (t) {
   const req = createReq('127.0.0.1')
-  t.throws(proxyaddr.bind(null, req, '10.0.0.1/255.0.255.0'), /invalid range on address/)
-  t.throws(proxyaddr.bind(null, req, '10.0.0.1/ffc0::'), /invalid range on address/)
-  t.throws(proxyaddr.bind(null, req, 'fe80::/ffc0::'), /invalid range on address/)
-  t.throws(proxyaddr.bind(null, req, 'fe80::/255.255.255.0'), /invalid range on address/)
-  t.throws(proxyaddr.bind(null, req, '::ffff:a00:2/255.255.255.0'), /invalid range on address/)
+  t.throws(proxyaddr.bind(null, req, '10.0.0.1/255.0.255.0'), /invalid range on address/u)
+  t.throws(proxyaddr.bind(null, req, '10.0.0.1/ffc0::'), /invalid range on address/u)
+  t.throws(proxyaddr.bind(null, req, 'fe80::/ffc0::'), /invalid range on address/u)
+  t.throws(proxyaddr.bind(null, req, 'fe80::/255.255.255.0'), /invalid range on address/u)
+  t.throws(proxyaddr.bind(null, req, '::ffff:a00:2/255.255.255.0'), /invalid range on address/u)
   t.end()
 })
 
@@ -414,4 +414,4 @@ function createReq (socketAddr, headers) {
 
 function all () { return true }
 function none () { return false }
-function trust10x (addr) { return /^10\./.test(addr) }
+function trust10x (addr) { return /^10\./u.test(addr) }

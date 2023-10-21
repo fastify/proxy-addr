@@ -4,7 +4,7 @@ const { test } = require('tap')
 const proxyaddr = require('..')
 
 test('argument req should be required', function (t) {
-  t.throws(proxyaddr.all, /req.*required/)
+  t.throws(proxyaddr.all, /req.*required/u)
   t.end()
 })
 

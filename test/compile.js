@@ -4,7 +4,7 @@ const { test } = require('tap')
 const proxyaddr = require('..')
 
 test('trust arg should be required', function (t) {
-  t.throws(proxyaddr.compile, /argument.*required/)
+  t.throws(proxyaddr.compile, /argument.*required/u)
   t.end()
 })
 
@@ -19,7 +19,7 @@ test('trust arg should accept a string', function (t) {
 })
 
 test('trust arg should reject a number', function (t) {
-  t.throws(proxyaddr.compile.bind(null, 42), /unsupported trust argument/)
+  t.throws(proxyaddr.compile.bind(null, 42), /unsupported trust argument/u)
   t.end()
 })
 
@@ -49,16 +49,16 @@ test('trust arg should accept pre-defined names in array', function (t) {
 })
 
 test('trust arg should reject non-IP', function (t) {
-  t.throws(proxyaddr.compile.bind(null, 'blargh'), /invalid IP address/)
-  t.throws(proxyaddr.compile.bind(null, '-1'), /invalid IP address/)
+  t.throws(proxyaddr.compile.bind(null, 'blargh'), /invalid IP address/u)
+  t.throws(proxyaddr.compile.bind(null, '-1'), /invalid IP address/u)
   t.end()
 })
 
 test('trust arg should reject bad CIDR', function (t) {
-  t.throws(proxyaddr.compile.bind(null, '10.0.0.1/6000'), /invalid range on address/)
-  t.throws(proxyaddr.compile.bind(null, '::1/6000'), /invalid range on address/)
-  t.throws(proxyaddr.compile.bind(null, '::ffff:a00:2/136'), /invalid range on address/)
-  t.throws(proxyaddr.compile.bind(null, '::ffff:a00:2/-46'), /invalid range on address/)
+  t.throws(proxyaddr.compile.bind(null, '10.0.0.1/6000'), /invalid range on address/u)
+  t.throws(proxyaddr.compile.bind(null, '::1/6000'), /invalid range on address/u)
+  t.throws(proxyaddr.compile.bind(null, '::ffff:a00:2/136'), /invalid range on address/u)
+  t.throws(proxyaddr.compile.bind(null, '::ffff:a00:2/-46'), /invalid range on address/u)
   t.end()
 })
 
