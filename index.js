@@ -8,32 +8,16 @@
 'use strict'
 
 /**
- * Module exports.
- * @public
- */
-
-module.exports = proxyaddr
-module.exports.default = proxyaddr
-module.exports.proxyaddr = proxyaddr
-module.exports.all = alladdrs
-module.exports.compile = compile
-
-/**
  * Module dependencies.
  * @private
  */
 
-const forwarded = require('@fastify/forwarded')
-const ipaddr = require('ipaddr.js')
-
-/**
- * Variables.
- * @private
- */
-
-const DIGIT_REGEXP = /^[0-9]+$/
-const isip = ipaddr.isValid
-const parseip = ipaddr.parse
+const { isIP } = require('node:net')
+const { forwarded } = require('@fastify/forwarded')
+const { parse: parseIp } = require('ipaddr.js')
+const { isIPv4MappedIPv6Address } = require('./lib/is-ipv4-mapped-ipv6-address')
+const { prefixLengthFromSubnetMask } = require('./lib/prefix-length-from-subnet-mask')
+const { isInteger } = require('./lib/is-integer')
 
 /**
  * Pre-defined IP ranges.
@@ -41,38 +25,46 @@ const parseip = ipaddr.parse
  */
 
 const IP_RANGES = {
+  __proto__: null,
   linklocal: ['169.254.0.0/16', 'fe80::/10'],
   loopback: ['127.0.0.1/8', '::1/128'],
   uniquelocal: ['10.0.0.0/8', '172.16.0.0/12', '192.168.0.0/16', 'fc00::/7']
 }
 
 /**
+ * @callback TrustFunction
+ * @param {string} addr
+ * @param {number} i
+ * @returns {boolean}
+ */
+
+/**
  * Get all addresses in the request, optionally stopping
  * at the first untrusted.
  *
  * @param {Object} request
- * @param {Function|Array|String} [trust]
+ * @param {TrustFunction|Array|String} [trust]
  * @public
  */
 
-function alladdrs (req, trust) {
-  // get addresses
-  const addrs = forwarded(req)
-
+function alladdrs (request, trust) {
   if (!trust) {
     // Return all addresses
-    return addrs
+    return forwarded(request)
   }
 
-  if (typeof trust !== 'function') {
-    trust = compile(trust)
-  }
+  typeof trust !== 'function' && (trust = compile(trust))
 
+  // get addresses
+  const addrs = forwarded(request)
+
+  const len = addrs.length - 1
   /* eslint-disable no-var */
-  for (var i = 0; i < addrs.length - 1; i++) {
-    if (trust(addrs[i], i)) continue
-
-    addrs.length = i + 1
+  for (var i = 0; i < len; i++) {
+    if (trust(addrs[i], i) === false) {
+      addrs.length = i + 1
+      break
+    }
   }
 
   return addrs
@@ -82,6 +74,7 @@ function alladdrs (req, trust) {
  * Compile argument into trust function.
  *
  * @param {Array|String} val
+ * @returns {TrustFunction}
  * @private
  */
 
@@ -90,6 +83,9 @@ function compile (val) {
     throw new TypeError('argument is required')
   }
 
+  /**
+   * @type {string[]}
+   */
   let trust
 
   if (typeof val === 'string') {
@@ -104,14 +100,12 @@ function compile (val) {
   for (var i = 0; i < trust.length; i++) {
     val = trust[i]
 
-    if (!Object.prototype.hasOwnProperty.call(IP_RANGES, val)) {
-      continue
+    if (val in IP_RANGES) {
+      // Splice in pre-defined range
+      val = IP_RANGES[val]
+      trust.splice.apply(trust, [i, 1].concat(val))
+      i += val.length - 1
     }
-
-    // Splice in pre-defined range
-    val = IP_RANGES[val]
-    trust.splice.apply(trust, [i, 1].concat(val))
-    i += val.length - 1
   }
 
   return compileTrust(compileRangeSubnets(trust))
@@ -120,16 +114,18 @@ function compile (val) {
 /**
  * Compile `arr` elements into range subnets.
  *
- * @param {Array} arr
  * @private
+ *
+ * @param {Array} arr
  */
 
 function compileRangeSubnets (arr) {
-  const rangeSubnets = new Array(arr.length)
+  const len = arr.length
+  const rangeSubnets = new Array(len)
 
   /* eslint-disable no-var */
-  for (var i = 0; i < arr.length; i++) {
-    rangeSubnets[i] = parseipNotation(arr[i])
+  for (var i = 0; i < len; i++) {
+    rangeSubnets[i] = parseIpNotation(arr[i])
   }
 
   return rangeSubnets
@@ -138,8 +134,10 @@ function compileRangeSubnets (arr) {
 /**
  * Compile range subnet array into trust function.
  *
- * @param {Array} rangeSubnets
  * @private
+ *
+ * @param {Array} rangeSubnets
+ * @returns {TrustFunction}
  */
 
 function compileTrust (rangeSubnets) {
@@ -155,41 +153,47 @@ function compileTrust (rangeSubnets) {
 /**
  * Parse IP notation string into range subnet.
  *
- * @param {String} note
  * @private
+ *
+ * @param {String} note
  */
 
-function parseipNotation (note) {
+function parseIpNotation (note) {
   const pos = note.lastIndexOf('/')
   const str = pos !== -1
     ? note.substring(0, pos)
     : note
 
-  if (!isip(str)) {
+  if (isIP(str) === 0) {
     throw new TypeError('invalid IP address: ' + str)
   }
 
-  let ip = parseip(str)
+  let ip = parseIp(str)
 
-  if (pos === -1 && ip.kind() === 'ipv6' && ip.isIPv4MappedAddress()) {
+  if (pos === -1 && ip.kind() === 'ipv6' && isIPv4MappedIPv6Address(str)) {
     // Store as IPv4
     ip = ip.toIPv4Address()
   }
 
-  const max = ip.kind() === 'ipv6'
+  const kind = ip.kind()
+
+  const max = kind === 'ipv6'
     ? 128
     : 32
 
+  /**
+   * @type {number|string}
+   */
   let range = pos !== -1
     ? note.substring(pos + 1, note.length)
     : null
 
   if (range === null) {
     range = max
-  } else if (DIGIT_REGEXP.test(range)) {
+  } else if (isInteger(range)) {
     range = parseInt(range, 10)
-  } else if (ip.kind() === 'ipv4' && isip(range)) {
-    range = parseNetmask(range)
+  } else if (kind === 'ipv4' && isIP(range) === 4) {
+    range = prefixLengthFromSubnetMask(range)
   } else {
     range = null
   }
@@ -198,35 +202,20 @@ function parseipNotation (note) {
     throw new TypeError('invalid range on address: ' + note)
   }
 
-  return [ip, range]
-}
-
-/**
- * Parse netmask string into CIDR range.
- *
- * @param {String} netmask
- * @private
- */
-
-function parseNetmask (netmask) {
-  const ip = parseip(netmask)
-  const kind = ip.kind()
-
-  return kind === 'ipv4'
-    ? ip.prefixLengthFromSubnetMask()
-    : null
+  return [ip, range, kind]
 }
 
 /**
  * Determine address of proxied request.
  *
- * @param {Object} request
- * @param {Function|Array|String} trust
  * @public
+ *
+ * @param {Object} request
+ * @param {TrustFunction|Array|String} trust
  */
 
-function proxyaddr (req, trust) {
-  if (!req) {
+function proxyaddr (request, trust) {
+  if (!request) {
     throw new TypeError('req argument is required')
   }
 
@@ -234,16 +223,37 @@ function proxyaddr (req, trust) {
     throw new TypeError('trust argument is required')
   }
 
-  const addrs = alladdrs(req, trust)
-  const addr = addrs[addrs.length - 1]
+  typeof trust !== 'function' && (trust = compile(trust))
 
-  return addr
+  // get addresses
+  const addrs = forwarded(request)
+
+  switch (addrs.length) {
+    case 1:
+      return addrs[0]
+    case 2:
+      return trust(addrs[0], 0)
+        ? addrs[1]
+        : addrs[0]
+    default: {
+      /* eslint-disable no-var */
+      for (var i = 0; i < addrs.length - 1; i++) {
+        if (trust(addrs[i], i) === false) {
+          return addrs[i]
+        }
+      }
+
+      return addrs[addrs.length - 1]
+    }
+  }
 }
 
 /**
  * Static trust function to trust nothing.
  *
  * @private
+ *
+ * @type {TrustFunction}
  */
 
 function trustNone () {
@@ -253,28 +263,33 @@ function trustNone () {
 /**
  * Compile trust function for multiple subnets.
  *
- * @param {Array} subnets
  * @private
+ *
+ * @param {Array} subnets
+ * @returns {TrustFunction}
  */
 
 function trustMulti (subnets) {
   return function trust (addr) {
-    if (!isip(addr)) return false
+    if (isIP(addr) === 0) return false
 
-    const ip = parseip(addr)
+    const ip = parseIp(addr)
     let ipconv
     const kind = ip.kind()
+    const isIPv4MappedAddress = kind === 'ipv6'
+      ? isIPv4MappedIPv6Address(addr)
+      : false
 
     /* eslint-disable no-var */
     for (var i = 0; i < subnets.length; i++) {
       const subnet = subnets[i]
       const subnetip = subnet[0]
-      const subnetkind = subnetip.kind()
       const subnetrange = subnet[1]
+      const subnetkind = subnet[2]
       let trusted = ip
 
       if (kind !== subnetkind) {
-        if (subnetkind === 'ipv4' && !ip.isIPv4MappedAddress()) {
+        if (subnetkind === 'ipv4' && !isIPv4MappedAddress) {
           // Incompatible IP addresses
           continue
         }
@@ -301,24 +316,29 @@ function trustMulti (subnets) {
 /**
  * Compile trust function for single subnet.
  *
- * @param {Object} subnet
  * @private
+ *
+ * @param {Object} subnet
+ * @returns {TrustFunction}
  */
 
 function trustSingle (subnet) {
   const subnetip = subnet[0]
-  const subnetkind = subnetip.kind()
-  const subnetisipv4 = subnetkind === 'ipv4'
   const subnetrange = subnet[1]
+  const subnetkind = subnet[2]
+  const subnetisipv4 = subnetkind === 'ipv4'
 
   return function trust (addr) {
-    if (!isip(addr)) return false
+    if (isIP(addr) === 0) return false
 
-    let ip = parseip(addr)
+    let ip = parseIp(addr)
     const kind = ip.kind()
+    const isIPv4MappedAddress = kind === 'ipv6'
+      ? isIPv4MappedIPv6Address(addr)
+      : false
 
     if (kind !== subnetkind) {
-      if (subnetisipv4 && !ip.isIPv4MappedAddress()) {
+      if (subnetisipv4 && !isIPv4MappedAddress) {
         // Incompatible IP addresses
         return false
       }
@@ -332,3 +352,14 @@ function trustSingle (subnet) {
     return ip.match(subnetip, subnetrange)
   }
 }
+
+/**
+ * Module exports.
+ * @public
+ */
+
+module.exports = proxyaddr
+module.exports.default = proxyaddr
+module.exports.proxyaddr = proxyaddr
+module.exports.all = alladdrs
+module.exports.compile = compile

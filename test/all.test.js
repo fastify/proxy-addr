@@ -8,7 +8,7 @@ test('argument req should be required', function (t) {
   t.end()
 })
 
-test('argument trustshould be optional', function (t) {
+test('argument trust should be optional', function (t) {
   const req = createReq('127.0.0.1')
   t.doesNotThrow(proxyaddr.all.bind(null, req))
   t.end()
@@ -25,6 +25,14 @@ test('with x-forwarded-for header should include x-forwarded-for', function (t) 
     'x-forwarded-for': '10.0.0.1'
   })
   t.same(proxyaddr.all(req), ['127.0.0.1', '10.0.0.1'])
+  t.end()
+})
+
+test('with x-forwarded-for header should include x-forwarded-for, using trust function', function (t) {
+  const req = createReq('127.0.0.1', {
+    'x-forwarded-for': '10.0.0.1'
+  })
+  t.same(proxyaddr.all(req, () => true), ['127.0.0.1', '10.0.0.1'])
   t.end()
 })
 

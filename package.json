@@ -34,8 +34,10 @@
   "scripts": {
     "bench": "node benchmark/index.js",
     "lint": "standard",
+    "lint:fix": "standard --fix",
     "test": "npm run test:unit && npm run test:typescript",
     "test:typescript": "tsd",
-    "test:unit": "tap"
+    "test:unit": "tap",
+    "test:coverage": "tap --coverage-report=html"
   }
 }
