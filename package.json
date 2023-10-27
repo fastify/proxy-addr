@@ -3,6 +3,7 @@
   "description": "Determine address of proxied request",
   "version": "4.1.0",
   "main": "index.js",
+  "type": "commonjs",
   "types": "types/index.d.ts",
   "author": "Douglas Christopher Wilson <doug@somethingdoug.com>",
   "license": "MIT",
