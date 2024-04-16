@@ -21,15 +21,15 @@
   },
   "homepage": "https://github.com/fastify/proxy-addr#readme",
   "dependencies": {
-    "@fastify/forwarded": "^2.0.0",
-    "ipaddr.js": "^2.0.0"
+    "@fastify/forwarded": "^2.2.0",
+    "ipaddr.js": "^2.1.0"
   },
   "devDependencies": {
-    "@types/node": "^20.1.0",
+    "@types/node": "^20.12.7",
     "beautify-benchmark": "0.2.4",
     "benchmark": "2.1.4",
-    "standard": "^17.0.0",
-    "tap": "^16.0.0",
+    "standard": "^17.1.0",
+    "tap": "^18.7.2",
     "tsd": "^0.31.0"
   },
   "scripts": {
