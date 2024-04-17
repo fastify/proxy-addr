@@ -29,8 +29,9 @@
     "@types/node": "^20.12.7",
     "beautify-benchmark": "0.2.4",
     "benchmark": "2.1.4",
+    "c8": "^7.14.0",
     "standard": "^17.1.0",
-    "tap": "^18.7.2",
+    "tape": "^5.7.5",
     "tsd": "^0.31.0"
   },
   "scripts": {
@@ -39,6 +40,6 @@
     "lint:fix": "standard --fix",
     "test": "npm run test:unit && npm run test:typescript",
     "test:typescript": "tsd",
-    "test:unit": "tap"
+    "test:unit": "c8 tape test/**/*.js"
   }
 }
