@@ -1,6 +1,6 @@
 'use strict'
 
-const { test } = require('tap')
+const test = require('tape')
 const proxyaddr = require('..')
 
 test('trust arg should be required', function (t) {
