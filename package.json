@@ -21,7 +21,7 @@
   },
   "homepage": "https://github.com/fastify/proxy-addr#readme",
   "dependencies": {
-    "@fastify/forwarded": "^2.2.0",
+    "@fastify/forwarded": "^3.0.0",
     "ipaddr.js": "^2.1.0"
   },
   "devDependencies": {
