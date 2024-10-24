@@ -68,8 +68,7 @@ function alladdrs (req, trust) {
     trust = compile(trust)
   }
 
-  /* eslint-disable no-var */
-  for (var i = 0; i < addrs.length - 1; i++) {
+  for (let i = 0; i < addrs.length - 1; i++) {
     if (trust(addrs[i], i)) continue
 
     addrs.length = i + 1
@@ -100,8 +99,7 @@ function compile (val) {
     throw new TypeError('unsupported trust argument')
   }
 
-  /* eslint-disable no-var */
-  for (var i = 0; i < trust.length; i++) {
+  for (let i = 0; i < trust.length; i++) {
     val = trust[i]
 
     if (!Object.hasOwn(IP_RANGES, val)) {
@@ -127,8 +125,7 @@ function compile (val) {
 function compileRangeSubnets (arr) {
   const rangeSubnets = new Array(arr.length)
 
-  /* eslint-disable no-var */
-  for (var i = 0; i < arr.length; i++) {
+  for (let i = 0; i < arr.length; i++) {
     rangeSubnets[i] = parseipNotation(arr[i])
   }
 
@@ -265,8 +262,7 @@ function trustMulti (subnets) {
     let ipconv
     const kind = ip.kind()
 
-    /* eslint-disable no-var */
-    for (var i = 0; i < subnets.length; i++) {
+    for (let i = 0; i < subnets.length; i++) {
       const subnet = subnets[i]
       const subnetip = subnet[0]
       const subnetkind = subnetip.kind()

@@ -19,7 +19,7 @@ $ npm i @fastify/proxy-addr
 <!-- eslint-disable no-unused-vars -->
 
 ```js
-var proxyaddr = require('@fastify/proxy-addr')
+const proxyaddr = require('@fastify/proxy-addr')
 ```
 
 ### proxyaddr(req, trust)
@@ -116,8 +116,8 @@ returns a function suitable for `proxyaddr(req, trust)`.
 <!-- eslint-disable no-undef, no-unused-vars -->
 
 ```js
-var trust = proxyaddr.compile('loopback')
-var addr = proxyaddr(req, trust)
+const trust = proxyaddr.compile('loopback')
+const addr = proxyaddr(req, trust)
 ```
 
 This function is meant to be optimized for use against every request.
