@@ -30,14 +30,14 @@
     "beautify-benchmark": "0.2.4",
     "benchmark": "2.1.4",
     "c8": "^10.1.2",
-    "standard": "^17.1.0",
+    "neostandard": "^0.11.9",
     "tape": "^5.7.5",
     "tsd": "^0.31.0"
   },
   "scripts": {
     "bench": "node benchmark/index.js",
-    "lint": "standard",
-    "lint:fix": "standard --fix",
+    "lint": "eslint",
+    "lint:fix": "eslint --fix",
     "test": "npm run test:unit && npm run test:typescript",
     "test:typescript": "tsd",
     "test:unit": "c8 tape test/**/*.js"
