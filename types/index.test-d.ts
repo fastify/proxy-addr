@@ -1,5 +1,5 @@
 import proxyaddr from '..'
-import { createServer } from 'http'
+import { createServer } from 'node:http'
 import { expectType } from 'tsd'
 
 createServer(req => {

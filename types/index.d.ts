@@ -1,6 +1,6 @@
 /// <reference types="node" />
 
-import { IncomingMessage } from 'http'
+import { IncomingMessage } from 'node:http'
 
 type FastifyProxyAddr = typeof proxyaddr
 
