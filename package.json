@@ -6,6 +6,25 @@
   "type": "commonjs",
   "types": "types/index.d.ts",
   "author": "Douglas Christopher Wilson <doug@somethingdoug.com>",
+  "contributors": [
+    {
+      "name": "Matteo Collina",
+      "email": "hello@matteocollina.com"
+    },
+    {
+      "name": "Aras Abbasi",
+      "email": "aras.abbasi@gmail.com"
+    },
+    {
+      "name": "James Sumners",
+      "url": "https://james.sumners.info"
+    },
+    {
+      "name": "Frazer Smith",
+      "email": "frazer.dev@icloud.com",
+      "url": "https://github.com/fdawgs"
+    }
+  ],
   "license": "MIT",
   "keywords": [
     "ip",
@@ -20,6 +39,16 @@
     "url": "https://github.com/fastify/proxy-addr/issues"
   },
   "homepage": "https://github.com/fastify/proxy-addr#readme",
+  "funding": [
+    {
+      "type": "github",
+      "url": "https://github.com/sponsors/fastify"
+    },
+    {
+      "type": "opencollective",
+      "url": "https://opencollective.com/fastify"
+    }
+  ],
   "dependencies": {
     "@fastify/forwarded": "^3.0.0",
     "ipaddr.js": "^2.1.0"
