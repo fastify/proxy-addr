@@ -270,14 +270,16 @@ function trustMulti (subnets) {
       let trusted = ip
 
       if (kind !== subnetkind) {
-        if (subnetkind === 'ipv4' && !ip.isIPv4MappedAddress()) {
+        const subnetisipv4 = subnetkind === 'ipv4'
+
+        if (subnetisipv4 && !ip.isIPv4MappedAddress()) {
           // Incompatible IP addresses
           continue
         }
 
         if (!ipconv) {
           // Convert IP to match subnet IP kind
-          ipconv = subnetkind === 'ipv4'
+          ipconv = subnetisipv4
             ? ip.toIPv4Address()
             : ip.toIPv4MappedAddress()
         }
