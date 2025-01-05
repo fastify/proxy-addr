@@ -1,6 +1,6 @@
 {
   "name": "@fastify/proxy-addr",
-  "description": "Determine address of proxied request",
+  "description": "Determine the address of a proxied request",
   "version": "5.0.0",
   "main": "index.js",
   "type": "commonjs",
