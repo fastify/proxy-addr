@@ -4,7 +4,7 @@ import { expectType } from 'tsd'
 
 createServer(req => {
   expectType<string>(proxyaddr(req, addr => addr === '127.0.0.1'))
-  expectType<string>(proxyaddr(req, (addr, i) => i < 1))
+  expectType<string>(proxyaddr(req, (_addr, i) => i < 1))
 
   expectType<string>(proxyaddr(req, '127.0.0.1'))
   expectType<string>(proxyaddr(req, ['127.0.0.0/8', '10.0.0.0/8']))

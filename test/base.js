@@ -111,7 +111,7 @@ test('trust should be invoked as trust(addr, i)', function (t) {
     'x-forwarded-for': '192.168.0.1, 10.0.0.1'
   })
 
-  proxyaddr(req, function (addr, i) {
+  proxyaddr(req, function () {
     return log.push(Array.prototype.slice.call(arguments))
   })
 
@@ -377,7 +377,7 @@ test('when header contains non-ip addresses should provide all values to functio
     'x-forwarded-for': 'myrouter, 127.0.0.1, proxy'
   })
 
-  proxyaddr(req, function (addr, i) {
+  proxyaddr(req, function () {
     return log.push(Array.prototype.slice.call(arguments))
   })
 
