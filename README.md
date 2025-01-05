@@ -4,7 +4,7 @@
 [![NPM version](https://img.shields.io/npm/v/@fastify/proxy-addr.svg?style=flat)](https://www.npmjs.com/package/@fastify/proxy-addr)
 [![neostandard javascript style](https://img.shields.io/badge/code_style-neostandard-brightgreen?style=flat)](https://github.com/neostandard/neostandard)
 
-Determine address of proxied request.
+Determine the address of a proxied request.
 
 Forked from https://github.com/jshttp/proxy-addr to address https://github.com/jshttp/forwarded/pull/9.
 
@@ -37,7 +37,7 @@ proxyaddr(req, function (addr) { return addr === '127.0.0.1' })
 proxyaddr(req, function (addr, i) { return i < 1 })
 ```
 
-The `trust` arugment may also be a single IP address string or an
+The `trust` argument may also be a single IP address string or an
 array of trusted addresses, as plain IP addresses, CIDR-formatted
 strings, or IP/netmask strings.
 
@@ -88,7 +88,7 @@ from the socket address.
 
 ### proxyaddr.all(req, [trust])
 
-Return all the addresses of the request, optionally stopping at the
+Return all the request addresses, optionally stopping at the
 first untrusted. This array is ordered from closest to furthest
 (i.e. `arr[0] === req.connection.remoteAddress`).
 
@@ -121,8 +121,8 @@ const addr = proxyaddr(req, trust)
 ```
 
 This function is meant to be optimized for use against every request.
-It is recommend to compile a trust function up-front for the trusted
-configuration and pass that to `proxyaddr(req, trust)` for each request.
+It is recommended that a trust function be compiled up-front for the
+trusted configuration and passed to proxyaddr(req, trust) for each request.
 
 ## Testing
 
@@ -133,9 +133,9 @@ $ npm test
 ## Benchmarks
 
 ```sh
-$ npm run-script bench
+$ npm run bench
 ```
 
 ## License
 
-[MIT](LICENSE)
+Licensed under [MIT](./LICENSE).
