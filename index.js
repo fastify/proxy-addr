@@ -232,9 +232,8 @@ function proxyaddr (req, trust) {
   }
 
   const addrs = alladdrs(req, trust)
-  const addr = addrs[addrs.length - 1]
 
-  return addr
+  return addrs[addrs.length - 1]
 }
 
 /**
