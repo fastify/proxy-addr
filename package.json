@@ -54,7 +54,6 @@
     "ipaddr.js": "^2.1.0"
   },
   "devDependencies": {
-    "@fastify/pre-commit": "^2.1.0",
     "@types/node": "^24.0.8",
     "beautify-benchmark": "0.2.4",
     "benchmark": "2.1.4",
