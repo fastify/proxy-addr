@@ -54,7 +54,7 @@
     "ipaddr.js": "^2.1.0"
   },
   "devDependencies": {
-    "@types/node": "^25.0.3",
+    "@types/node": "^26.0.1",
     "beautify-benchmark": "0.2.4",
     "benchmark": "2.1.4",
     "c8": "^11.0.0",
