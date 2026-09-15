@@ -294,6 +294,41 @@ test('when IPv4-mapped IPv6 addresses should match CIDR notation for IPv4-mapped
   t.assert.strictEqual(proxyaddr(req, ['::ffff:a00:2/122', '127.0.0.1']), '10.0.0.200')
 })
 
+test('when IPv4-mapped IPv6 trust subnet has a short prefix it should not trust arbitrary IPv4', function (t) {
+  const req = createReq('1.1.1.1', {
+    'x-forwarded-for': '6.6.6.6'
+  })
+  t.assert.strictEqual(proxyaddr(req, '::ffff:10.0.0.0/8'), '1.1.1.1')
+})
+
+test('when IPv6 trust subnet has zero leading bits it should not trust arbitrary IPv4', function (t) {
+  const req = createReq('1.1.1.1', {
+    'x-forwarded-for': '6.6.6.6'
+  })
+  t.assert.strictEqual(proxyaddr(req, '::/1'), '1.1.1.1')
+})
+
+test('when IPv4-mapped IPv6 trust subnet is used a native IPv6 address should not match', function (t) {
+  const req = createReq('2001:db8::1', {
+    'x-forwarded-for': '6.6.6.6'
+  })
+  t.assert.strictEqual(proxyaddr(req, '::ffff:10.0.0.0/104'), '2001:db8::1')
+})
+
+test('when IPv4-mapped IPv6 trust subnet in a list has a short prefix it should not trust arbitrary IPv4', function (t) {
+  const req = createReq('1.1.1.1', {
+    'x-forwarded-for': '6.6.6.6'
+  })
+  t.assert.strictEqual(proxyaddr(req, ['::ffff:10.0.0.0/8', '127.0.0.1']), '1.1.1.1')
+})
+
+test('when IPv4-mapped IPv6 trust subnet in a list is used a native IPv6 address should not match', function (t) {
+  const req = createReq('2001:db8::1', {
+    'x-forwarded-for': '6.6.6.6'
+  })
+  t.assert.strictEqual(proxyaddr(req, ['::ffff:10.0.0.0/104', 'fe80::/125']), '2001:db8::1')
+})
+
 test('when given predefined names should accept single pre-defined name', function (t) {
   const req = createReq('fe80::1', {
     'x-forwarded-for': '2002:c000:203::1, fe80::2'
