@@ -257,7 +257,14 @@ function trustMulti (subnets) {
   return function trust (addr) {
     if (!isip(addr)) return false
 
-    const ip = parseip(addr)
+    let ip = parseip(addr)
+
+    if (ip.kind() === 'ipv6' && ip.isIPv4MappedAddress()) {
+      // Canonicalize IPv4-mapped candidates to IPv4 so a mapped address
+      // cannot bypass the cross-family guard via the same-family path
+      ip = ip.toIPv4Address()
+    }
+
     let ipconv
     const kind = ip.kind()
 
@@ -276,14 +283,23 @@ function trustMulti (subnets) {
           continue
         }
 
+        if (!subnetisipv4 && !(subnetrange >= 96 && subnetip.isIPv4MappedAddress())) {
+          // IPv6 subnet only spans IPv4 when it is a mapped subnet whose
+          // prefix covers the ::ffff: marker; otherwise it must not match IPv4
+          continue
+        }
+
         if (!ipconv) {
-          // Convert IP to match subnet IP kind
-          ipconv = subnetisipv4
-            ? ip.toIPv4Address()
-            : ip.toIPv4MappedAddress()
+          // IPv4-mapped candidates were canonicalized to IPv4 above, so a
+          // cross-family IPv4 subnet is handled via the same-family path and
+          // this conversion only ever produces an IPv4-mapped address
+          ipconv = ip.toIPv4MappedAddress()
         }
 
         trusted = ipconv
+      } else if (kind === 'ipv6' && subnetip.isIPv4MappedAddress()) {
+        // A native IPv6 candidate cannot match an IPv4-mapped subnet
+        continue
       }
 
       if (trusted.match(subnetip, subnetrange)) {
@@ -312,6 +328,13 @@ function trustSingle (subnet) {
     if (!isip(addr)) return false
 
     let ip = parseip(addr)
+
+    if (ip.kind() === 'ipv6' && ip.isIPv4MappedAddress()) {
+      // Canonicalize IPv4-mapped candidates to IPv4 so a mapped address
+      // cannot bypass the cross-family guard via the same-family path
+      ip = ip.toIPv4Address()
+    }
+
     const kind = ip.kind()
 
     if (kind !== subnetkind) {
@@ -320,10 +343,19 @@ function trustSingle (subnet) {
         return false
       }
 
-      // Convert IP to match subnet IP kind
-      ip = subnetisipv4
-        ? ip.toIPv4Address()
-        : ip.toIPv4MappedAddress()
+      if (!subnetisipv4 && !(subnetrange >= 96 && subnetip.isIPv4MappedAddress())) {
+        // IPv6 subnet only spans IPv4 when it is a mapped subnet whose
+        // prefix covers the ::ffff: marker; otherwise it must not match IPv4
+        return false
+      }
+
+      // IPv4-mapped candidates were canonicalized to IPv4 above, so a
+      // cross-family IPv4 subnet is handled via the same-family path and
+      // this conversion only ever produces an IPv4-mapped address
+      ip = ip.toIPv4MappedAddress()
+    } else if (kind === 'ipv6' && subnetip.isIPv4MappedAddress()) {
+      // A native IPv6 candidate cannot match an IPv4-mapped subnet
+      return false
     }
 
     return ip.match(subnetip, subnetrange)
