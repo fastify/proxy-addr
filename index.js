@@ -89,7 +89,7 @@ function forwarded (header) {
  *
  * @param {Object} request
  * @param {Function|Array|String} [trust]
- * @param {boolean} [uds]
+ * @param {Boolean} [uds]
  * @public
  */
 
@@ -263,7 +263,7 @@ function parseNetmask (netmask) {
  *
  * @param {Object} request
  * @param {Function|Array|String} trust
- * @param {boolean} [uds]
+ * @param {Boolean} [uds]
  * @public
  */
 
