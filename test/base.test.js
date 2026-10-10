@@ -386,6 +386,13 @@ test('when socket address undefined should return undefined even wtesth trusted 
   t.assert.strictEqual(proxyaddr(req, '127.0.0.1'), undefined)
 })
 
+test('when socket address undefined and uds set should skip socket', function (t) {
+  const req = createReq(undefined, {
+    'x-forwarded-for': '127.0.0.1, 10.0.0.1'
+  })
+  t.assert.strictEqual(proxyaddr(req, '127.0.0.1', true), '10.0.0.1')
+})
+
 function createReq (socketAddr, headers) {
   return {
     socket: {
