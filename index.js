@@ -60,6 +60,8 @@ function forwarded (header) {
 
   header = header.trim()
 
+  // Based on https://github.com/fastify/forwarded
+  // a fork of https://github.com/jshttp/forwarded
   const result = []
   let end = header.length
   let start = end
