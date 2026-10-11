@@ -17,13 +17,13 @@ module.exports.default = proxyaddr
 module.exports.proxyaddr = proxyaddr
 module.exports.all = alladdrs
 module.exports.compile = compile
+module.exports.forwarded = forwarded
 
 /**
  * Module dependencies.
  * @private
  */
 
-const forwarded = require('@fastify/forwarded')
 const ipaddr = require('ipaddr.js')
 
 /**
@@ -47,17 +47,63 @@ const IP_RANGES = {
 }
 
 /**
+ * Get all addresses in the `X-Forwarded-For` header.
+ *
+ * @param {string} header
+ * @public
+ */
+
+function forwarded (header) {
+  if (!header || typeof header !== 'string') {
+    return []
+  }
+
+  header = header.trim()
+
+  // Based on https://github.com/fastify/forwarded
+  // a fork of https://github.com/jshttp/forwarded
+  const result = []
+  let end = header.length
+  let start = end
+  let char
+  let i
+
+  for (i = end - 1; i >= 0; --i) {
+    char = header[i]
+    if (char === ' ' || char === '\t') {
+      (start === end) && (start = end = i)
+    } else if (char === ',') {
+      (start !== end) && result.push(header.slice(start, end))
+      start = end = i
+    } else {
+      start = i
+    }
+  }
+
+  (start !== end) && result.push(header.substring(start, end))
+
+  return result
+}
+
+/**
  * Get all addresses in the request, optionally stopping
  * at the first untrusted.
  *
  * @param {Object} request
  * @param {Function|Array|String} [trust]
+ * @param {Boolean} [uds]
  * @public
  */
 
-function alladdrs (req, trust) {
+function alladdrs (req, trust, uds) {
+  if (!req) {
+    throw new TypeError('argument req is required')
+  }
+
   // get addresses
-  const addrs = forwarded(req)
+  const socketAddr = req.socket.remoteAddress
+  const header = forwarded(req.headers['x-forwarded-for'])
+  const addrs = uds && !socketAddr ? header : [socketAddr, ...header]
 
   if (!trust) {
     // Return all addresses
@@ -219,10 +265,11 @@ function parseNetmask (netmask) {
  *
  * @param {Object} request
  * @param {Function|Array|String} trust
+ * @param {Boolean} [uds]
  * @public
  */
 
-function proxyaddr (req, trust) {
+function proxyaddr (req, trust, uds) {
   if (!req) {
     throw new TypeError('req argument is required')
   }
@@ -231,7 +278,7 @@ function proxyaddr (req, trust) {
     throw new TypeError('trust argument is required')
   }
 
-  const addrs = alladdrs(req, trust)
+  const addrs = alladdrs(req, trust, uds)
 
   return addrs[addrs.length - 1]
 }

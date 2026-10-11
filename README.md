@@ -22,13 +22,16 @@ $ npm i @fastify/proxy-addr
 const proxyaddr = require('@fastify/proxy-addr')
 ```
 
-### proxyaddr(req, trust)
+### proxyaddr(req, trust, uds)
 
 Return the address of the request, using the given `trust` parameter.
 
 The `trust` argument is a function that returns `true` if you trust
 the address, `false` if you don't. The closest untrusted address is
 returned.
+
+The optional `uds` (Unix domain socket) argument indicates whether
+an undefined socket remote address should be treated as trusted.
 
 <!-- eslint-disable no-undef -->
 
@@ -86,7 +89,7 @@ given two arguments: `addr` and `i`, where `addr` is a string of
 the address to check and `i` is a number that represents the distance
 from the socket address.
 
-### proxyaddr.all(req, [trust])
+### proxyaddr.all(req, [trust], [uds])
 
 Return all the request addresses, optionally stopping at the
 first untrusted. This array is ordered from closest to furthest

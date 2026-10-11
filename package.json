@@ -50,7 +50,6 @@
     }
   ],
   "dependencies": {
-    "@fastify/forwarded": "^3.0.0",
     "ipaddr.js": "^2.1.0"
   },
   "devDependencies": {
