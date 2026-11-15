@@ -59,6 +59,11 @@ proxyaddr(req, '::1')
 proxyaddr(req, ['::1/128', 'fe80::/10'])
 ```
 
+IPv6 zone identifiers are compared when they are present in a trusted
+address. For example, `fe80::1%proxy0` only trusts that address on the
+`proxy0` interface. An unzoned link-local address such as `fe80::1`
+remains zone-agnostic and can match the same address on any interface.
+
 This module will automatically work with IPv4-mapped IPv6 addresses
 as well to support node.js in IPv6-only mode. This means that you do
 not have to specify both `::ffff:a00:1` and `10.0.0.1`.

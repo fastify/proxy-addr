@@ -238,6 +238,13 @@ test('when given IPv6 addresses should accept CIDR notation', function (t) {
   t.assert.strictEqual(proxyaddr(req, 'fe80::/125'), 'fe80::ff00')
 })
 
+test('when a zoned IPv6 proxy is trusted should reject another zone', function (t) {
+  const req = createReq('fe80::1%edge0', {
+    'x-forwarded-for': '198.51.100.7'
+  })
+  t.assert.strictEqual(proxyaddr(req, 'fe80::1%proxy0'), 'fe80::1%edge0')
+})
+
 test('with IP version mixed should match respective versions', function (t) {
   const req = createReq('::1', {
     'x-forwarded-for': '2002:c000:203::1'

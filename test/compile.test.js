@@ -27,6 +27,22 @@ test('trust arg should accept IPv6', function (t) {
   t.assert.strictEqual(typeof proxyaddr.compile('::1'), 'function')
 })
 
+test('zoned IPv6 trust should require the same zone', function (t) {
+  const trust = proxyaddr.compile('fe80::1%proxy0')
+
+  t.assert.strictEqual(trust('fe80::1%proxy0'), true)
+  t.assert.strictEqual(trust('fe80::1%edge0'), false)
+  t.assert.strictEqual(trust('fe80::1'), false)
+})
+
+test('zoned IPv6 trust in an array should require the same zone', function (t) {
+  const trust = proxyaddr.compile(['127.0.0.1', 'fe80::1%proxy0'])
+
+  t.assert.strictEqual(trust('fe80::1%proxy0'), true)
+  t.assert.strictEqual(trust('fe80::1%edge0'), false)
+  t.assert.strictEqual(trust('fe80::1'), false)
+})
+
 test('trust arg should accept IPv4-style IPv6', function (t) {
   t.assert.strictEqual(typeof proxyaddr.compile('::ffff:127.0.0.1'), 'function')
 })

@@ -302,6 +302,10 @@ function trustMulti (subnets) {
         continue
       }
 
+      if (subnetip.zoneId && subnetip.zoneId !== trusted.zoneId) {
+        continue
+      }
+
       if (trusted.match(subnetip, subnetrange)) {
         return true
       }
@@ -355,6 +359,10 @@ function trustSingle (subnet) {
       ip = ip.toIPv4MappedAddress()
     } else if (kind === 'ipv6' && subnetip.isIPv4MappedAddress()) {
       // A native IPv6 candidate cannot match an IPv4-mapped subnet
+      return false
+    }
+
+    if (subnetip.zoneId && subnetip.zoneId !== ip.zoneId) {
       return false
     }
 
